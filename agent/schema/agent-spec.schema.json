@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "number",
+      "const": 1
+    },
+    "business": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "industry": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "languages": {
+          "minItems": 1,
+          "maxItems": 5,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]{2}$"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "industry",
+        "country",
+        "timezone",
+        "currency",
+        "languages"
+      ],
+      "additionalProperties": false
+    },
+    "assistant": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "cercano",
+            "formal",
+            "neutral"
+          ]
+        },
+        "greeting": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "disclosure": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 300,
+          "pattern": "autom[aá]tic|automated|automatic"
+        }
+      },
+      "required": [
+        "displayName",
+        "tone",
+        "greeting",
+        "disclosure"
+      ],
+      "additionalProperties": false
+    },
+    "hours": {
+      "type": "object",
+      "properties": {
+        "weekly": {
+          "maxItems": 14,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "day": {
+                "type": "string",
+                "enum": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ]
+              },
+              "open": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+              },
+              "close": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+              }
+            },
+            "required": [
+              "day",
+              "open",
+              "close"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "outsideHoursMessage": {
+          "type": "string",
+          "maxLength": 300
+        }
+      },
+      "required": [
+        "weekly",
+        "outsideHoursMessage"
+      ],
+      "additionalProperties": false
+    },
+    "catalog": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "shopify"
+          ]
+        },
+        "allowPriceQuotes": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source",
+        "allowPriceQuotes"
+      ],
+      "additionalProperties": false
+    },
+    "policies": {
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "text": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "topic",
+          "text"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "handoff": {
+      "type": "object",
+      "properties": {
+        "keywords": {
+          "maxItems": 30,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 40
+          }
+        },
+        "onComplaint": {
+          "type": "boolean"
+        },
+        "maxAgentTurns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "message": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 300
+        }
+      },
+      "required": [
+        "keywords",
+        "onComplaint",
+        "maxAgentTurns",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "leads": {
+      "type": "object",
+      "properties": {
+        "capture": {
+          "type": "boolean"
+        },
+        "fields": {
+          "maxItems": 4,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "name",
+              "interest",
+              "budget",
+              "preferred_contact_time"
+            ]
+          }
+        }
+      },
+      "required": [
+        "capture",
+        "fields"
+      ],
+      "additionalProperties": false
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "maxReplyChars": {
+          "type": "integer",
+          "minimum": 80,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "maxReplyChars"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "version",
+    "business",
+    "assistant",
+    "hours",
+    "catalog",
+    "policies",
+    "handoff",
+    "leads",
+    "limits"
+  ],
+  "additionalProperties": false
+}

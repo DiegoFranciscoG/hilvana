@@ -1,0 +1,34 @@
+{
+  "$comment": "Controles del agente (OWASP Top 10 for LLM Applications 2025, #55). Patrones y textos en datos, no en código.",
+  "injectionPatterns": [
+    "ignor[ae]\\s+(todas\\s+)?(tus|las|sus)\\s+(instrucciones|reglas)",
+    "olvida\\s+(todo|tus\\s+instrucciones|lo\\s+anterior)",
+    "ignore\\s+(all\\s+)?(previous|prior|above)\\s+instructions",
+    "(system|developer)\\s+(prompt|message|mode)",
+    "prompt\\s+(del|de)\\s+sistema",
+    "(modo|mode)\\s+(desarrollador|developer|dios|god|dan)",
+    "eres\\s+ahora|ahora\\s+eres|act[uú]a\\s+como|you\\s+are\\s+now|pretend\\s+to\\s+be",
+    "(revela|mu[eé]strame|dime|repite)\\s+(tus|las)\\s+(instrucciones|reglas|indicaciones)",
+    "jailbreak",
+    "(precio|descuento)\\s+(secreto|especial\\s+de\\s+empleado|interno)",
+    "<\\s*/?\\s*(system|instructions?)\\s*>"
+  ],
+  "complaintPatterns": [
+    "queja",
+    "reclamo",
+    "estafa",
+    "denuncia",
+    "p[eé]sim[oa]",
+    "devu[eé]lv[ae]n?(me)?\\s+(mi\\s+)?dinero",
+    "nunca\\s+lleg[oó]"
+  ],
+  "availabilityClaims": ["tenemos", "s[ií]\\s+hay", "disponibles?", "contamos\\s+con", "en\\s+stock"],
+  "messages": {
+    "injectionRefusal": "Puedo ayudarte con información de {business}: productos, precios, horarios y pedidos. ¿Qué necesitas?",
+    "guardrailFallback": "No tengo ese dato confirmado. Te paso con una persona del equipo para que te responda bien.",
+    "outsideHoursSuffix": "Nuestro horario de atención: {hours}."
+  },
+  "allowedLinkHosts": [],
+  "minSystemPromptLeakChars": 40,
+  "retrievalTopK": 5
+}
