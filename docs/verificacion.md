@@ -10,7 +10,7 @@ Revisión hecha el **2026-11-16** contra fuentes oficiales. El detalle de cada f
 | Supabase CLI | 3.1.0 | #1 | `.github/workflows/ci.yml`, `cli/src/config.ts`, `flake.nix` |
 | Postgres de Supabase | la que trae la CLI 3.1.0 (`supabase/postgres` 17.x) | #1, #18 | `supabase/config.toml` (`major_version = 17`) |
 | Deno | 2.9.8 | #9 | `toolchain.env`, Dockerfiles, CI |
-| Hono | 4.13.19 (JSR) | #12 | `deno.json` |
+| Hono | 4.13.18 (JSR; la 4.13.19 salió el mismo día y Deno exige 24 h de antigüedad) | #12 | `deno.json` |
 | postgres.js | 4.1.1 | #15 | `deno.json` |
 | Zod | 4.6.7 | #15 | `deno.json` |
 | SDK MCP | `@modelcontextprotocol/server` 2.4.0 | #15, #16 | `deno.json` |
