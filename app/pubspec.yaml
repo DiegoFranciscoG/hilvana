@@ -1,0 +1,38 @@
+name: hilvana
+description: Bandeja de Hilvana para atender WhatsApp, Instagram y Messenger desde iOS, Android, web y Linux.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_flutter: 2.18.3
+  firebase_core: 5.1.0
+  firebase_messaging: 17.0.1
+  go_router: 18.1.4
+  flutter_svg: 2.4.0
+  http: 1.6.0
+  intl: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 6.0.0
+  mocktail: 1.0.5
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/brand/
+    - assets/l10n/
+  fonts:
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces.ttf
+    - family: IBM Plex Sans
+      fonts:
+        - asset: assets/fonts/IBMPlexSans.ttf

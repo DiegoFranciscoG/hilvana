@@ -1,0 +1,199 @@
+# Hilvana completo en local: `deno task cli init` (genera .env) y luego `docker compose up --build`.
+# Supabase autoalojado (Postgres, Auth, API REST, Realtime) con las versiones que fija la CLI de
+# Supabase 3.1.0, más el Telar, su trabajador, la app web y datos de demo ficticios.
+# Solo se publica la pasarela en http://localhost:8000; la base no queda expuesta.
+name: hilvana
+
+x-telar-env: &telar-env
+  TELAR_DB_HOST: db
+  TELAR_DB_PASSWORD: ${TELAR_DB_PASSWORD:?Define TELAR_DB_PASSWORD (deno task cli init)}
+  SUPABASE_URL: http://gateway:8080
+  SUPABASE_SECRET_KEY: ${SERVICE_ROLE_KEY:?Define SERVICE_ROLE_KEY (deno task cli init)}
+  SUPABASE_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET (deno task cli init)}
+  TELAR_ALLOWED_ORIGINS: http://localhost:8000
+  LAB_CAPTURE: ${LAB_CAPTURE:-on}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+
+x-telar-allow: &telar-allow-env
+  "--allow-env=PORT,TELAR_PORT,TELAR_DB_HOST,TELAR_DB_PORT,TELAR_DB_NAME,TELAR_DB_USER,TELAR_DB_PASSWORD,TELAR_DB_SSL,SUPABASE_URL,SUPABASE_SECRET_KEY,SUPABASE_JWT_SECRET,TELAR_ALLOWED_ORIGINS,TELAR_PUBLIC_URL,TELAR_DRAIN_TOKEN,LAB_CAPTURE,LOG_LEVEL,FCM_PROJECT_ID,FCM_SERVICE_ACCOUNT_B64,WORKER_IDLE_MS"
+
+services:
+  db:
+    image: supabase/postgres:17.11.0.018
+    restart: unless-stopped
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "log_min_messages=fatal"]
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD (deno task cli init)}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD (deno task cli init)}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./docker/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:ro
+      - ./docker/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  migrate:
+    image: supabase/postgres:17.11.0.018
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["sh", "-c", "/scripts/db-migrate.sh && /scripts/db-bootstrap.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD (deno task cli init)}
+      TELAR_DB_PASSWORD: ${TELAR_DB_PASSWORD:?Define TELAR_DB_PASSWORD (deno task cli init)}
+      MIGRATIONS_DIR: /migrations
+    volumes:
+      - ./supabase/migrations:/migrations:ro
+      - ./scripts:/scripts:ro
+
+  auth:
+    image: supabase/gotrue:v2.197.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://localhost:8000/auth/v1
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}@db:5432/postgres
+      GOTRUE_SITE_URL: http://localhost:8000
+      GOTRUE_URI_ALLOW_LIST: http://localhost:8000
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET}
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_PASSWORD_MIN_LENGTH: 10
+      GOTRUE_PASSWORD_REQUIRED_CHARACTERS: "abcdefghijklmnopqrstuvwxyz:ABCDEFGHIJKLMNOPQRSTUVWXYZ:0123456789"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9999/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  rest:
+    image: postgrest/postgrest:v16.5
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}@db:5432/postgres
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_EXTRA_SEARCH_PATH: public,extensions
+      PGRST_DB_MAX_ROWS: 200
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_ADMIN_SERVER_PORT: 3001
+      PGRST_ADMIN_SERVER_HOST: localhost
+
+  realtime:
+    image: supabase/realtime:v2.154.0
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      PORT: 4000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: supabase_admin
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}
+      DB_NAME: postgres
+      DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
+      DB_ENC_KEY: ${REALTIME_DB_ENC_KEY:?Define REALTIME_DB_ENC_KEY (16 caracteres, deno task cli init)}
+      API_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET}
+      METRICS_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET}
+      SECRET_KEY_BASE: ${REALTIME_SECRET_KEY_BASE:?Define REALTIME_SECRET_KEY_BASE (deno task cli init)}
+      ERL_AFLAGS: -proto_dist inet_tcp
+      DNS_NODES: "''"
+      RLIMIT_NOFILE: "10000"
+      APP_NAME: realtime
+      SEED_SELF_HOST: "true"
+      RUN_JANITOR: "true"
+
+  telar:
+    build:
+      context: .
+      dockerfile: telar/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment: *telar-env
+    command:
+      - "--allow-net=0.0.0.0:8787,db:5432,gateway:8080,graph.facebook.com,graph.instagram.com,*.myshopify.com,fcm.googleapis.com,oauth2.googleapis.com,host.docker.internal:11434"
+      - *telar-allow-env
+      - "--allow-read=/app/telar/config,/app/agent/config,/app/lab/config"
+      - "telar/src/main.ts"
+
+  worker:
+    build:
+      context: .
+      dockerfile: telar/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment: *telar-env
+    healthcheck:
+      disable: true
+    command:
+      - "--allow-net=db:5432,gateway:8080,graph.facebook.com,graph.instagram.com,*.myshopify.com,fcm.googleapis.com,oauth2.googleapis.com,host.docker.internal:11434"
+      - *telar-allow-env
+      - "--allow-read=/app/telar/config,/app/agent/config,/app/lab/config"
+      - "telar/src/worker_main.ts"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - auth
+      - rest
+      - realtime
+      - telar
+    environment:
+      SUPABASE_ANON_KEY: ${ANON_KEY:?Define ANON_KEY (deno task cli init)}
+      PUBLIC_URL: http://localhost:8000
+    ports:
+      - "127.0.0.1:8000:8080"
+
+  seed:
+    image: denoland/deno:2.9.8
+    restart: "no"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      auth:
+        condition: service_healthy
+    working_dir: /app
+    environment:
+      DENO_DIR: /deno-dir
+      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY:?Define SERVICE_ROLE_KEY}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:?Define DEMO_PASSWORD (deno task cli init)}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}
+      SEED_AUTH_URL: http://auth:9999
+    volumes:
+      - .:/app:ro
+      - deno-cache:/deno-dir
+    command: ["run", "--allow-net=db:5432,auth:9999", "--allow-env", "--allow-read=/app", "scripts/demo_seed.ts"]
+
+volumes:
+  db-data:
+  deno-cache:
