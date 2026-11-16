@@ -1,0 +1,47 @@
+# Colección de ejemplos de la API del Telar (REST Client de VS Code o JetBrains HTTP Client).
+# Local: http://localhost:8000/telar (detrás de la pasarela). OpenAPI: {{telar}}/openapi.json
+# Los tokens se obtienen al iniciar sesión; nunca los guardes en este archivo.
+
+@telar = http://localhost:8000/telar
+@auth = http://localhost:8000/auth/v1
+@anonKey = <ANON_KEY de .env>
+@credentialId = <id de credencial de hilvana space list>
+@conversationId = <id de conversación>
+
+### Salud
+GET {{telar}}/healthz
+
+### Lista para atender
+GET {{telar}}/readyz
+
+### Documento OpenAPI
+GET {{telar}}/openapi.json
+
+### Verificación del webhook de Meta (lo que hace Meta al configurar la URL)
+GET {{telar}}/webhooks/meta/{{credentialId}}?hub.mode=subscribe&hub.verify_token=<verify token>&hub.challenge=1158201444
+
+### Iniciar sesión con el usuario de demo (Auth)
+# @name login
+POST {{auth}}/token?grant_type=password
+apikey: {{anonKey}}
+Content-Type: application/json
+
+{ "email": "demo@hilvana.test", "password": "<DEMO_PASSWORD de .env>" }
+
+### Responder como persona del equipo (409 si la ventana de 24 h está cerrada)
+POST {{telar}}/api/conversations/{{conversationId}}/messages
+Authorization: Bearer {{login.response.body.access_token}}
+Content-Type: application/json
+
+{ "text": "Hola, te ayudo con tu pedido." }
+
+### Configurador: primera pregunta
+POST {{telar}}/api/configurator/answer
+Authorization: Bearer {{login.response.body.access_token}}
+Content-Type: application/json
+
+{}
+
+### Eliminar la cuenta (borra datos y usuario; cierra sesión en todos los dispositivos)
+DELETE {{telar}}/api/account
+Authorization: Bearer {{login.response.body.access_token}}
