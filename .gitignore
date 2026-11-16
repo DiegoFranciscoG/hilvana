@@ -1,0 +1,50 @@
+# ---- Secretos y entorno
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+service-account*.json
+# ---- Firebase: configuración nativa por proyecto, nunca en el repositorio
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+# ---- Supabase CLI
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+# ---- Deno / herramientas
+coverage/
+dist/
+*.log
+# ---- Laboratorio: capturas locales sin exportar
+lab/.captures/
+# ---- Flutter / Dart / Android / iOS
+.dart_tool/
+.flutter-plugins*
+.packages
+build/
+*.apk
+*.aab
+*.ipa
+local.properties
+app/android/.gradle/
+app/ios/Pods/
+app/ios/.symlinks/
+app/ios/Flutter/Generated.xcconfig
+app/ios/Flutter/flutter_export_environment.sh
+app/linux/flutter/ephemeral/
+# ---- Nix
+result
+result-*
+# ---- IDE / SO
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db

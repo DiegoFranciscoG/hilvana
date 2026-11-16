@@ -1,0 +1,15 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+**/node_modules
+**/.dart_tool
+**/build
+coverage
+dist
+docs/img
+lab/.captures
+supabase/.temp
+supabase/.branches
+*.log
