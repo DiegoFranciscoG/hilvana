@@ -1,0 +1,13 @@
+{
+  "id": 8800000000001,
+  "title": "Pan de yuca",
+  "body_html": "<p>Docena de pan de yuca recién horneado.</p>",
+  "handle": "pan-de-yuca",
+  "status": "active",
+  "updated_at": "2026-11-16T10:00:00-05:00",
+  "admin_graphql_api_id": "gid://shopify/Product/8800000000001",
+  "variants": [
+    { "id": 4400000000001, "title": "Docena", "price": "3.50", "sku": "PDY-12", "inventory_quantity": 40 },
+    { "id": 4400000000002, "title": "Media docena", "price": "1.90", "sku": "PDY-06", "inventory_quantity": 25 }
+  ]
+}

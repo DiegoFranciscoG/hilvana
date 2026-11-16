@@ -1,0 +1,27 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "102030405060708",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "593990000100", "phone_number_id": "110000000000001" },
+            "contacts": [{ "profile": { "name": "Mateo Cárdenas" }, "wa_id": "593987654321" }],
+            "messages": [
+              {
+                "from": "593987654321",
+                "id": "wamid.HBgMNTkzOTg3NjU0MzIxFQIAEhgUQUJDREVGMDEyMzQ1Njc4OUFCQwA=",
+                "timestamp": "1794830460",
+                "type": "image",
+                "image": { "caption": "Así quiero la torta, a nombre de Mateo", "mime_type": "image/jpeg", "sha256": "c2FtcGxlLWhhc2g=", "id": "1234567890123456" }
+              }
+            ]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ]
+}

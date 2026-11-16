@@ -1,0 +1,10 @@
+{
+  "$comment": "Versión de Graph API y hosts oficiales (docs/investigacion.md #20, #22, #30). Cambiar aquí, no en el código.",
+  "graphApiVersion": "v27.0",
+  "hosts": {
+    "whatsapp": "https://graph.facebook.com",
+    "messenger": "https://graph.facebook.com",
+    "instagram": "https://graph.instagram.com"
+  },
+  "webhookMaxBodyBytes": 1048576
+}

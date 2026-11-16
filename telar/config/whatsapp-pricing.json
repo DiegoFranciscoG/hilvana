@@ -1,0 +1,10 @@
+{
+  "$comment": "Modelo de precios de WhatsApp (#24). Las tarifas por mercado salen del rate card oficial de Meta y no se cargaron (S-01): mientras sean null, cost_usd queda vacío.",
+  "model": "per_message",
+  "serviceMessagesChargedFrom": "2026-10-01",
+  "freeServiceMessagesPerNumberPerMonth": 1000,
+  "ratesUsd": {
+    "EC": { "service": null, "utility": null, "marketing": null, "authentication": null },
+    "PE": { "service": null, "utility": null, "marketing": null, "authentication": null }
+  }
+}

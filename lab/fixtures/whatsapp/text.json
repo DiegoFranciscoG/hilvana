@@ -1,0 +1,27 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "102030405060708",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "593990000100", "phone_number_id": "110000000000001" },
+            "contacts": [{ "profile": { "name": "Lucía Andrade" }, "wa_id": "593991234567" }],
+            "messages": [
+              {
+                "from": "593991234567",
+                "id": "wamid.HBgMNTkzOTkxMjM0NTY3FQIAEhgUM0FBQkNERUYwMTIzNDU2Nzg5AA==",
+                "timestamp": "1794830400",
+                "type": "text",
+                "text": { "body": "Hola, soy Lucía Andrade. ¿Cuánto cuesta el pan de yuca? Mi correo es lucia.andrade@correo.test y mi celular 0991234567" }
+              }
+            ]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ]
+}

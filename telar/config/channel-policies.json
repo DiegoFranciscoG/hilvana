@@ -1,0 +1,6 @@
+{
+  "$comment": "Ventanas de mensajería (#22, #27, #30). HUMAN_AGENT exige aprobación de Meta (S-02).",
+  "whatsapp": { "serviceWindowHours": 24, "outsideWindow": "template_only" },
+  "messenger": { "serviceWindowHours": 24, "outsideWindow": "human_agent_tag", "humanAgentWindowDays": 7 },
+  "instagram": { "serviceWindowHours": 24, "outsideWindow": "human_agent_tag", "humanAgentWindowDays": 7 }
+}

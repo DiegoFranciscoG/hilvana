@@ -1,0 +1,6 @@
+{
+  "shop_id": 9100000000001,
+  "shop_domain": "panaderia-andina-demo.myshopify.com",
+  "customer": { "id": 6600000000001, "email": "valeria.mora@correo.test", "phone": "+593998887766" },
+  "orders_to_redact": [5500000000001]
+}

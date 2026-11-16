@@ -1,0 +1,7 @@
+{
+  "$comment": "Admin GraphQL (#31, #34, #36). Alcances mínimos que debe pedir la app de la tienda.",
+  "apiVersion": "2026-10",
+  "scopes": ["read_products", "read_inventory", "read_orders"],
+  "webhookTopics": ["products/create", "products/update", "products/delete", "app/uninstalled"],
+  "complianceTopics": ["customers/data_request", "customers/redact", "shop/redact"]
+}
