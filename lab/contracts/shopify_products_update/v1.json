@@ -1,0 +1,85 @@
+{
+  "channel": "shopify",
+  "eventKey": "shopify.products/update",
+  "id": "shopify_products_update@v1",
+  "sampleCount": 1,
+  "schema": {
+    "properties": {
+      "admin_graphql_api_id": {
+        "type": "string",
+        "x-kind": "id"
+      },
+      "body_html": {
+        "type": "string",
+        "x-kind": "text"
+      },
+      "handle": {
+        "type": "string",
+        "x-kind": "text"
+      },
+      "id": {
+        "type": "integer"
+      },
+      "status": {
+        "enum": [
+          "active"
+        ],
+        "type": "string"
+      },
+      "title": {
+        "type": "string",
+        "x-kind": "text"
+      },
+      "updated_at": {
+        "format": "date-time",
+        "type": "string"
+      },
+      "variants": {
+        "items": {
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "inventory_quantity": {
+              "type": "integer"
+            },
+            "price": {
+              "type": "string",
+              "x-kind": "numeric"
+            },
+            "sku": {
+              "type": "string",
+              "x-kind": "text"
+            },
+            "title": {
+              "type": "string",
+              "x-kind": "text"
+            }
+          },
+          "required": [
+            "id",
+            "inventory_quantity",
+            "price",
+            "sku",
+            "title"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "admin_graphql_api_id",
+      "body_html",
+      "handle",
+      "id",
+      "status",
+      "title",
+      "updated_at",
+      "variants"
+    ],
+    "type": "object"
+  },
+  "schemaHash": "092672ecd3af65b5a9a115e305947b10c244fa65b6dbe8bc1cad1a926cad7e48",
+  "version": 1
+}

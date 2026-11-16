@@ -1,0 +1,25 @@
+{
+  "id": 0,
+  "title": "<text>",
+  "body_html": "<text>",
+  "handle": "<text>",
+  "status": "active",
+  "updated_at": "1970-01-01T00:00:00Z",
+  "admin_graphql_api_id": "<id>",
+  "variants": [
+    {
+      "id": 0,
+      "title": "<text>",
+      "price": "<numeric>",
+      "sku": "<text>",
+      "inventory_quantity": 0
+    },
+    {
+      "id": 0,
+      "title": "<text>",
+      "price": "<numeric>",
+      "sku": "<text>",
+      "inventory_quantity": 0
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "channel": "shopify",
+  "eventKey": "shopify.customers/redact",
+  "id": "shopify_customers_redact@v1",
+  "sampleCount": 1,
+  "schema": {
+    "properties": {
+      "customer": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "x-kind": "email"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "phone": {
+            "type": "string",
+            "x-kind": "phone"
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "phone"
+        ],
+        "type": "object"
+      },
+      "orders_to_redact": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "shop_domain": {
+        "type": "string",
+        "x-kind": "text"
+      },
+      "shop_id": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "customer",
+      "orders_to_redact",
+      "shop_domain",
+      "shop_id"
+    ],
+    "type": "object"
+  },
+  "schemaHash": "ffe4f3094450f6471d14c36be7b5412dfdaa3cd18b42c0551ededdfac8b0e735",
+  "version": 1
+}

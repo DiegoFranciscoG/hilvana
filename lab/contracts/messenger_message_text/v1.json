@@ -1,0 +1,101 @@
+{
+  "channel": "messenger",
+  "eventKey": "messenger.message.text",
+  "id": "messenger_message_text@v1",
+  "sampleCount": 1,
+  "schema": {
+    "properties": {
+      "entry": {
+        "items": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-kind": "id"
+            },
+            "messaging": {
+              "items": {
+                "properties": {
+                  "message": {
+                    "properties": {
+                      "mid": {
+                        "type": "string",
+                        "x-kind": "id"
+                      },
+                      "text": {
+                        "type": "string",
+                        "x-kind": "text"
+                      }
+                    },
+                    "required": [
+                      "mid",
+                      "text"
+                    ],
+                    "type": "object"
+                  },
+                  "recipient": {
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "x-kind": "id"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "type": "object"
+                  },
+                  "sender": {
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "x-kind": "id"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "type": "object"
+                  },
+                  "timestamp": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "message",
+                  "recipient",
+                  "sender",
+                  "timestamp"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "time": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "id",
+            "messaging",
+            "time"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "object": {
+        "enum": [
+          "page"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "entry",
+      "object"
+    ],
+    "type": "object"
+  },
+  "schemaHash": "4469f7939ceb7a9964d3c2e1eb4a961b85364023407da540b253618581e08eeb",
+  "version": 1
+}

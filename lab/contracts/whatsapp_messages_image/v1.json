@@ -1,0 +1,179 @@
+{
+  "channel": "whatsapp",
+  "eventKey": "whatsapp.messages.image",
+  "id": "whatsapp_messages_image@v1",
+  "sampleCount": 1,
+  "schema": {
+    "properties": {
+      "entry": {
+        "items": {
+          "properties": {
+            "changes": {
+              "items": {
+                "properties": {
+                  "field": {
+                    "enum": [
+                      "messages"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "properties": {
+                      "contacts": {
+                        "items": {
+                          "properties": {
+                            "profile": {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "x-kind": "name"
+                                }
+                              },
+                              "required": [
+                                "name"
+                              ],
+                              "type": "object"
+                            },
+                            "wa_id": {
+                              "type": "string",
+                              "x-kind": "phone"
+                            }
+                          },
+                          "required": [
+                            "profile",
+                            "wa_id"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "messages": {
+                        "items": {
+                          "properties": {
+                            "from": {
+                              "type": "string",
+                              "x-kind": "phone"
+                            },
+                            "id": {
+                              "type": "string",
+                              "x-kind": "id"
+                            },
+                            "image": {
+                              "properties": {
+                                "caption": {
+                                  "type": "string",
+                                  "x-kind": "text"
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "x-kind": "id"
+                                },
+                                "mime_type": {
+                                  "type": "string",
+                                  "x-kind": "text"
+                                },
+                                "sha256": {
+                                  "type": "string",
+                                  "x-kind": "text"
+                                }
+                              },
+                              "required": [
+                                "caption",
+                                "id",
+                                "mime_type",
+                                "sha256"
+                              ],
+                              "type": "object"
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "x-kind": "numeric"
+                            },
+                            "type": {
+                              "enum": [
+                                "image"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "from",
+                            "id",
+                            "image",
+                            "timestamp",
+                            "type"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "messaging_product": {
+                        "enum": [
+                          "whatsapp"
+                        ],
+                        "type": "string"
+                      },
+                      "metadata": {
+                        "properties": {
+                          "display_phone_number": {
+                            "type": "string",
+                            "x-kind": "phone"
+                          },
+                          "phone_number_id": {
+                            "type": "string",
+                            "x-kind": "id"
+                          }
+                        },
+                        "required": [
+                          "display_phone_number",
+                          "phone_number_id"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "contacts",
+                      "messages",
+                      "messaging_product",
+                      "metadata"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "field",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "id": {
+              "type": "string",
+              "x-kind": "id"
+            }
+          },
+          "required": [
+            "changes",
+            "id"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "object": {
+        "enum": [
+          "whatsapp_business_account"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "entry",
+      "object"
+    ],
+    "type": "object"
+  },
+  "schemaHash": "6edc0715fc7181b876c1fdb2e588ff4fd299540047f6e4e3dee63243938d64b8",
+  "version": 1
+}

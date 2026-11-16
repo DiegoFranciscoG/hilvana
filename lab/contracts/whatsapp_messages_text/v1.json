@@ -1,0 +1,164 @@
+{
+  "channel": "whatsapp",
+  "eventKey": "whatsapp.messages.text",
+  "id": "whatsapp_messages_text@v1",
+  "sampleCount": 1,
+  "schema": {
+    "properties": {
+      "entry": {
+        "items": {
+          "properties": {
+            "changes": {
+              "items": {
+                "properties": {
+                  "field": {
+                    "enum": [
+                      "messages"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "properties": {
+                      "contacts": {
+                        "items": {
+                          "properties": {
+                            "profile": {
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "x-kind": "name"
+                                }
+                              },
+                              "required": [
+                                "name"
+                              ],
+                              "type": "object"
+                            },
+                            "wa_id": {
+                              "type": "string",
+                              "x-kind": "phone"
+                            }
+                          },
+                          "required": [
+                            "profile",
+                            "wa_id"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "messages": {
+                        "items": {
+                          "properties": {
+                            "from": {
+                              "type": "string",
+                              "x-kind": "phone"
+                            },
+                            "id": {
+                              "type": "string",
+                              "x-kind": "id"
+                            },
+                            "text": {
+                              "properties": {
+                                "body": {
+                                  "type": "string",
+                                  "x-kind": "text"
+                                }
+                              },
+                              "required": [
+                                "body"
+                              ],
+                              "type": "object"
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "x-kind": "numeric"
+                            },
+                            "type": {
+                              "enum": [
+                                "text"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "from",
+                            "id",
+                            "text",
+                            "timestamp",
+                            "type"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "messaging_product": {
+                        "enum": [
+                          "whatsapp"
+                        ],
+                        "type": "string"
+                      },
+                      "metadata": {
+                        "properties": {
+                          "display_phone_number": {
+                            "type": "string",
+                            "x-kind": "phone"
+                          },
+                          "phone_number_id": {
+                            "type": "string",
+                            "x-kind": "id"
+                          }
+                        },
+                        "required": [
+                          "display_phone_number",
+                          "phone_number_id"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "contacts",
+                      "messages",
+                      "messaging_product",
+                      "metadata"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "field",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "id": {
+              "type": "string",
+              "x-kind": "id"
+            }
+          },
+          "required": [
+            "changes",
+            "id"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "object": {
+        "enum": [
+          "whatsapp_business_account"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "entry",
+      "object"
+    ],
+    "type": "object"
+  },
+  "schemaHash": "4ad5de29ed0b3f3d778706d5e3e1ec3ee49cddbf46b2528c3700002c7c218f5e",
+  "version": 1
+}

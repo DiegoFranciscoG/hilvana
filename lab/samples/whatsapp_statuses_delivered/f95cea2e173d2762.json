@@ -1,0 +1,33 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "<id>",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "<phone>",
+              "phone_number_id": "<id>"
+            },
+            "statuses": [
+              {
+                "id": "<id>",
+                "status": "delivered",
+                "timestamp": "<numeric>",
+                "recipient_id": "<phone>",
+                "pricing": {
+                  "billable": true,
+                  "pricing_model": "<text>",
+                  "category": "service"
+                }
+              }
+            ]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ]
+}

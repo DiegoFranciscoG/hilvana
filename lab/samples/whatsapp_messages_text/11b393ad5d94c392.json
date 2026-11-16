@@ -1,0 +1,39 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "<id>",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "<phone>",
+              "phone_number_id": "<id>"
+            },
+            "contacts": [
+              {
+                "profile": {
+                  "name": "<name>"
+                },
+                "wa_id": "<phone>"
+              }
+            ],
+            "messages": [
+              {
+                "from": "<phone>",
+                "id": "<id>",
+                "timestamp": "<numeric>",
+                "type": "text",
+                "text": {
+                  "body": "<text>"
+                }
+              }
+            ]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ]
+}

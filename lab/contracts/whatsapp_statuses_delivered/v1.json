@@ -1,0 +1,146 @@
+{
+  "channel": "whatsapp",
+  "eventKey": "whatsapp.statuses.delivered",
+  "id": "whatsapp_statuses_delivered@v1",
+  "sampleCount": 1,
+  "schema": {
+    "properties": {
+      "entry": {
+        "items": {
+          "properties": {
+            "changes": {
+              "items": {
+                "properties": {
+                  "field": {
+                    "enum": [
+                      "messages"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "properties": {
+                      "messaging_product": {
+                        "enum": [
+                          "whatsapp"
+                        ],
+                        "type": "string"
+                      },
+                      "metadata": {
+                        "properties": {
+                          "display_phone_number": {
+                            "type": "string",
+                            "x-kind": "phone"
+                          },
+                          "phone_number_id": {
+                            "type": "string",
+                            "x-kind": "id"
+                          }
+                        },
+                        "required": [
+                          "display_phone_number",
+                          "phone_number_id"
+                        ],
+                        "type": "object"
+                      },
+                      "statuses": {
+                        "items": {
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "x-kind": "id"
+                            },
+                            "pricing": {
+                              "properties": {
+                                "billable": {
+                                  "type": "boolean"
+                                },
+                                "category": {
+                                  "enum": [
+                                    "service"
+                                  ],
+                                  "type": "string"
+                                },
+                                "pricing_model": {
+                                  "type": "string",
+                                  "x-kind": "text"
+                                }
+                              },
+                              "required": [
+                                "billable",
+                                "category",
+                                "pricing_model"
+                              ],
+                              "type": "object"
+                            },
+                            "recipient_id": {
+                              "type": "string",
+                              "x-kind": "phone"
+                            },
+                            "status": {
+                              "enum": [
+                                "delivered"
+                              ],
+                              "type": "string"
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "x-kind": "numeric"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "pricing",
+                            "recipient_id",
+                            "status",
+                            "timestamp"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "messaging_product",
+                      "metadata",
+                      "statuses"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "field",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "id": {
+              "type": "string",
+              "x-kind": "id"
+            }
+          },
+          "required": [
+            "changes",
+            "id"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "object": {
+        "enum": [
+          "whatsapp_business_account"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "entry",
+      "object"
+    ],
+    "type": "object"
+  },
+  "schemaHash": "48f12b4b3e663e11fe2f0625e64ffc8d2a24fa9484bf41ddf0b908c1057eea49",
+  "version": 1
+}

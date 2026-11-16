@@ -1,0 +1,12 @@
+{
+  "shop_id": 0,
+  "shop_domain": "<text>",
+  "customer": {
+    "id": 0,
+    "email": "<email>",
+    "phone": "<phone>"
+  },
+  "orders_to_redact": [
+    0
+  ]
+}
