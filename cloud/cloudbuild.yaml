@@ -1,0 +1,19 @@
+# Cloud Build: construye la imagen del Telar y la publica en Artifact Registry.
+# Lo invoca `hilvana deploy` (gcloud builds submit --config=cloud/cloudbuild.yaml). Imagen de builder fijada.
+steps:
+  - id: build
+    name: docker:29.9.2-cli
+    args:
+      - build
+      - --file=telar/Dockerfile
+      - --tag=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/telar:${_TAG}
+      - .
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/telar:${_TAG}
+substitutions:
+  _REGION: us-central1
+  _REPOSITORY: hilvana
+  _TAG: v1
+options:
+  logging: CLOUD_LOGGING_ONLY
+timeout: 900s

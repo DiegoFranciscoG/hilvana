@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secretos:
+    name: Escaneo de secretos (gitleaks)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Instalar gitleaks 8.30.1 (SHA-256 verificado)
+        run: |
+          curl -fsSL -o gl.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gl.tgz" | sha256sum -c -
+          tar -xzf gl.tgz gitleaks
+      - name: Escanear historial completo
+        run: ./gitleaks git . --redact --verbose --exit-code 1 -c .gitleaks.toml
+
+  deno:
+    name: Telar, laboratorio, agente, CLI y MCP
+    runs-on: ubuntu-24.04
+    needs: secretos
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: 2.9.8
+      - run: deno lint
+      - run: deno task check
+      - name: Pruebas unitarias (T-01, T-04, T-05, T-06, T-07, T-08, T-09) con cobertura
+        run: deno task test
+      - name: Reporte de cobertura
+        run: deno task coverage
+      - name: Evaluación del agente (50 conversaciones)
+        run: deno task eval
+
+  base-de-datos:
+    name: Base de datos con la CLI de Supabase (T-03, T-04, T-11)
+    runs-on: ubuntu-24.04
+    needs: secretos
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v3.2.0
+        with:
+          version: 3.1.0
+      - name: Postgres de Supabase con las migraciones
+        run: supabase db start
+      - name: Pruebas pgTAP
+        run: supabase test db
+
+  integracion:
+    name: Integración del Telar (T-01, T-02, T-07, T-10, T-11)
+    runs-on: ubuntu-24.04
+    needs: secretos
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: ./scripts/test-integration.sh
+
+  flutter:
+    name: App Flutter (T-11)
+    runs-on: ubuntu-24.04
+    needs: secretos
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: 3.50.0
+          channel: stable
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build web --release --no-web-resources-cdn
+
+  t12:
+    name: T-12 hilvana up en un Linux limpio con Nix
+    runs-on: ubuntu-24.04
+    needs: [deno, flutter]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
+      - run: ./scripts/t12-clean-linux.sh
