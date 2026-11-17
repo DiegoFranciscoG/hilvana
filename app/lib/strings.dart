@@ -1,9 +1,8 @@
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// Textos de la interfaz, cargados desde assets/l10n/<idioma>.json (no quemados en el código).
+/// Textos de la interfaz, cargados desde `assets/l10n/<idioma>.json` (no quemados en el código).
 class Strings {
   Strings(this._values);
 

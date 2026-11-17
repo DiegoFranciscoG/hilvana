@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Paleta de taller: lino crudo, tinta índigo e hilo terracota (sin degradados ni brillos).
 /// El hilo (#B5502B) sobre lino tiene contraste 4,3:1: se usa en acentos, íconos y texto grande;

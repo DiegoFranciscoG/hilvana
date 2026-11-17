@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +15,7 @@ Future<void> main() async {
   Intl.defaultLocale = 'es';
   await initializeDateFormatting('es');
   final config = await AppConfig.load();
-  await Supabase.initialize(url: config.supabaseUrl, anonKey: config.supabaseAnonKey);
+  await Supabase.initialize(url: config.supabaseUrl, publishableKey: config.supabaseAnonKey);
   final client = Supabase.instance.client;
   final inbox = SupabaseInboxRepository(client, config.telarUrl);
   final strings = await Strings.load(rootBundle);
