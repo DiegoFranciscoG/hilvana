@@ -59,28 +59,33 @@ class _ConversationViewState extends State<ConversationView> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              OutlinedButton.icon(
-                key: const Key('take'),
-                onPressed: () => widget.inbox.take(widget.conversationId),
-                icon: const Icon(Icons.pan_tool_outlined, size: 18),
-                label: Text(strings.t('take')),
-              ),
-              OutlinedButton.icon(
-                key: const Key('release'),
-                onPressed: () => widget.inbox.release(widget.conversationId),
-                icon: const Icon(Icons.auto_mode_outlined, size: 18),
-                label: Text(strings.t('release')),
-              ),
-              OutlinedButton.icon(
-                onPressed: () => widget.inbox.close(widget.conversationId),
-                icon: const Icon(Icons.check, size: 18),
-                label: Text(strings.t('close')),
-              ),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // En anchos chicos las acciones son íconos con su nombre en el tooltip (y en la semántica).
+              final compact = constraints.maxWidth < 520;
+              Widget action(Key? key, VoidCallback onPressed, IconData icon, String label) => compact
+                  ? IconButton.outlined(key: key, onPressed: onPressed, icon: Icon(icon), tooltip: label)
+                  : OutlinedButton.icon(key: key, onPressed: onPressed, icon: Icon(icon, size: 18), label: Text(label));
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  action(
+                    const Key('take'),
+                    () => widget.inbox.take(widget.conversationId),
+                    Icons.pan_tool_outlined,
+                    strings.t('take'),
+                  ),
+                  action(
+                    const Key('release'),
+                    () => widget.inbox.release(widget.conversationId),
+                    Icons.auto_mode_outlined,
+                    strings.t('release'),
+                  ),
+                  action(null, () => widget.inbox.close(widget.conversationId), Icons.check, strings.t('close')),
+                ],
+              );
+            },
           ),
         ),
         Expanded(
@@ -156,8 +161,8 @@ class _Bubble extends StatelessWidget {
     final problem = message.status == 'blocked'
         ? strings.t('blockedLabel')
         : message.status == 'failed'
-            ? strings.t('failedLabel')
-            : null;
+        ? strings.t('failedLabel')
+        : null;
     return Align(
       alignment: inbound ? Alignment.centerLeft : Alignment.centerRight,
       child: ConstrainedBox(

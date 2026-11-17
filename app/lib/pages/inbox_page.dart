@@ -35,12 +35,13 @@ class _InboxPageState extends State<InboxPage> {
     });
   }
 
-  void _open(BuildContext context, String id, bool wide) {
-    widget.inbox.markRead(id);
+  void _open(BuildContext context, ConversationSummary conversation, bool wide) {
+    widget.inbox.markRead(conversation.id);
     if (wide) {
-      setState(() => _selected = id);
+      setState(() => _selected = conversation.id);
     } else {
-      context.push('/c/$id');
+      // El nombre viaja con la ruta para el título; un enlace directo muestra la conversación sin él.
+      context.push('/c/${conversation.id}', extra: conversation.contactName);
     }
   }
 
@@ -66,7 +67,11 @@ class _InboxPageState extends State<InboxPage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-                        child: Text(strings.waiting(waiting), key: const Key('inbox-waiting'), style: theme.textTheme.titleMedium),
+                        child: Text(
+                          strings.waiting(waiting),
+                          key: const Key('inbox-waiting'),
+                          style: theme.textTheme.titleMedium,
+                        ),
                       ),
                       const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: StitchDivider()),
                       Expanded(
@@ -78,7 +83,7 @@ class _InboxPageState extends State<InboxPage> {
                                 itemBuilder: (context, i) => _ConversationTile(
                                   conversation: items[i],
                                   selected: wide && items[i].id == _selected,
-                                  onTap: () => _open(context, items[i].id, wide),
+                                  onTap: () => _open(context, items[i], wide),
                                 ),
                               ),
                       ),
@@ -87,26 +92,37 @@ class _InboxPageState extends State<InboxPage> {
                 },
               );
 
+        final Widget? workspace = _workspaces.length > 1
+            ? PopupMenuButton<Workspace>(
+                tooltip: strings.t('workspace'),
+                initialValue: _current,
+                onSelected: (ws) => setState(() {
+                  _current = ws;
+                  _selected = null;
+                }),
+                itemBuilder: (_) => [for (final ws in _workspaces) PopupMenuItem(value: ws, child: Text(ws.name))],
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(child: Text(_current?.name ?? '', overflow: TextOverflow.ellipsis)),
+                    const Icon(Icons.arrow_drop_down),
+                  ],
+                ),
+              )
+            : _current == null
+            ? null
+            : Text(_current!.name, overflow: TextOverflow.ellipsis);
+
         return Scaffold(
           appBar: AppBar(
-            title: Text(strings.t('inboxTitle')),
+            // En pantallas angostas el negocio es el título: "Conversaciones" y el selector no caben juntos.
+            title: wide || workspace == null ? Text(strings.t('inboxTitle')) : workspace,
             actions: [
-              if (_workspaces.length > 1)
-                PopupMenuButton<Workspace>(
-                  tooltip: strings.t('workspace'),
-                  initialValue: _current,
-                  onSelected: (ws) => setState(() {
-                    _current = ws;
-                    _selected = null;
-                  }),
-                  itemBuilder: (_) => [for (final ws in _workspaces) PopupMenuItem(value: ws, child: Text(ws.name))],
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(children: [Text(_current?.name ?? ''), const Icon(Icons.arrow_drop_down)]),
-                  ),
-                )
-              else if (_current != null)
-                Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Center(child: Text(_current!.name))),
+              if (wide && workspace != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Center(child: workspace),
+                ),
               IconButton(
                 key: const Key('open-settings'),
                 tooltip: strings.t('settings'),
@@ -203,7 +219,8 @@ class _StatusChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: highlight ? scheme.onSecondary : scheme.onSurface),
+        style: Theme.of(context).textTheme.labelSmall
+            ?.copyWith(color: highlight ? scheme.onSecondary : scheme.onSurface),
       ),
     );
   }

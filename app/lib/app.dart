@@ -52,12 +52,18 @@ class _HilvanaAppState extends State<HilvanaApp> {
       return null;
     },
     routes: [
-      GoRoute(path: '/login', builder: (context, state) => LoginPage(auth: widget.auth)),
-      GoRoute(path: '/', builder: (context, state) => InboxPage(inbox: widget.inbox)),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => LoginPage(auth: widget.auth),
+      ),
+      GoRoute(
+        path: '/',
+        builder: (context, state) => InboxPage(inbox: widget.inbox),
+      ),
       GoRoute(
         path: '/c/:id',
         builder: (context, state) => Scaffold(
-          appBar: AppBar(),
+          appBar: AppBar(title: state.extra is String ? Text(state.extra! as String) : null),
           body: ConversationView(inbox: widget.inbox, conversationId: state.pathParameters['id']!),
         ),
       ),
