@@ -89,6 +89,19 @@ queda en la sección de **Supuestos**. Si dos fuentes se contradicen, gana la of
 | 54 | OWASP API Security Top 10 2023 | https://api-security.owasp.org/editions/2023/en/0x11-t10 | 2026-11-16 | API1 BOLA, API2 autenticación, API4 consumo sin límite, API7 SSRF, API10 consumo inseguro de APIs. |
 | 55 | OWASP Top 10 for LLM Applications 2025 | https://genai.owasp.org/llm-top-10/ | 2026-11-16 | LLM01 Prompt Injection, LLM02 fuga de información, LLM05 manejo inseguro de la salida, LLM06 agencia excesiva, LLM07 fuga del prompt de sistema, LLM09 desinformación, LLM10 consumo sin límite. |
 
+## Verificación con Docker (2026-11-17)
+
+| # | Fuente | URL | Consultada | Qué se tomó de aquí |
+|---|---|---|---|---|
+| 56 | Supabase CLI 3.1.0 — `apps/cli/src/shared/services/Dockerfile` y `commands/db/start/SIDE_EFFECTS.md` | https://github.com/supabase/cli/tree/v3.1.0/apps/cli/src | 2026-11-17 | Imágenes que fija la CLI: postgres 17.11.0.018, gotrue v2.197.0, postgrest v16.5, realtime v2.154.0, pg_prove 3.36. `db start` corre las migraciones de Auth, Storage y Realtime en un volumen nuevo. |
+| 57 | Firebase — Get started with Firebase Cloud Messaging in Flutter apps | https://firebase.google.com/docs/cloud-messaging/flutter/get-started | 2026-11-17 | Registro por ID de instalación (FID) con `register()` y `onRegistered` (escuchar antes); activación `firebase_messaging_installation_id_enabled` / `FirebaseMessagingInstallationIdEnabled`; apagar la inicialización automática; no mezclar con las API de token. |
+| 58 | Firebase — FCM REST API v1, recurso `projects.messages` | https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages | 2026-11-17 | Campo `fid`; `token` deprecado (en la transición acepta un FID). |
+| 59 | pub.dev — `material_ui` (editor verificado flutter.dev) y `go_router` 18.1.4 | https://pub.dev/packages/material_ui | 2026-11-17 | `package:flutter/material.dart` deprecado desde Flutter 3.47; `material_ui` es una copia propia de Material y `go_router` 18 ya la usa. |
+| 60 | JSR — `@astral/astral` | https://jsr.io/@astral/astral | 2026-11-17 | Control de Chromium sin interfaz para las capturas (0.5.6). |
+| 61 | supabase/auth v2.197.0 — `internal/conf/configuration.go` | https://github.com/supabase/auth/blob/v2.197.0/internal/conf/configuration.go | 2026-11-17 | HS256 con los bytes crudos de `GOTRUE_JWT_SECRET`; roles de administración por defecto `service_role` y `supabase_admin`. |
+| 62 | PostgREST — Configuration | https://docs.postgrest.org/en/latest/references/configuration.html | 2026-11-17 | `db-use-legacy-gucs` ya no existe (se quitó del compose); `request.jwt.claims` es la única variable de claims. |
+| 63 | Docker Docs — Compose: variable interpolation | https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/ | 2026-11-17 | Precedencia: entorno de la shell, luego `--env-file`, luego `.env` → prefijo `HILVANA_` en lo que interpola el compose. |
+
 ## Supuestos (no verificados del todo)
 
 Estas reglas se usan con cuidado: están en archivos de datos versionados (no quemadas en el código) para
@@ -104,6 +117,6 @@ corregirlas sin tocar la lógica.
   despliegue por defecto usa facturación por solicitud, cubierta por #44.
 - **S-05 Capa gratuita de worker pools** — no documentada (#47); no se usan en el despliegue por defecto.
 - **S-06 Versión exacta que introdujo el runtime nativo** — la página (#2) no la indica; la fuente secundaria
-  menciona CLI 2.119.0. No afecta: Hilvana usa Docker por defecto y el runtime nativo es opcional en Linux.
+  menciona CLI 2.119.0. No afecta: Hilvana usa Docker y no ofrece el modo nativo.
 - **S-07 Exención de cuentas de organización en Google Play** — la regla de 12 testers (#42) aplica a cuentas
   personales; la página no menciona organizaciones de forma explícita.

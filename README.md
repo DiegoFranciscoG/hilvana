@@ -18,6 +18,12 @@ en `.env` (`HILVANA_DEMO_PASSWORD`). No hay demo pública: publicarla exige cuen
 
 ![Bandeja de Hilvana](docs/img/bandeja.png)
 
+| Entrada | Conversación | Ajustes |
+|---|---|---|
+| <img src="docs/img/entrada.png" alt="Pantalla de entrada" width="240"> | <img src="docs/img/conversacion.png" alt="Conversación pasada al equipo" width="240"> | <img src="docs/img/ajustes.png" alt="Ajustes con eliminar cuenta" width="240"> |
+
+Capturas reales del stack local con datos ficticios: `docker compose --profile tools run --rm screenshots`.
+
 ## Problema que resuelve
 
 Cada equipo que arma atención por WhatsApp, Instagram y Messenger empieza de cero: webhooks con firmas,
@@ -162,12 +168,16 @@ para usar en [docs/api.http](docs/api.http).
 ## Tests y cobertura
 
 ```bash
-deno task test && deno task coverage   # 66 pruebas unitarias (conectores, laboratorio, agente, Telar, CLI, MCP)
+deno task test && deno task coverage   # 68 pruebas unitarias (conectores, laboratorio, agente, Telar, CLI, MCP)
 deno task eval                         # 50 conversaciones simuladas del agente
-./scripts/test-db.sh                   # pgTAP en Postgres de Supabase (Docker)
-./scripts/test-integration.sh          # Telar contra Postgres real (Docker)
-cd app && flutter test                 # app Flutter
+./scripts/test-db.sh                   # 77 pruebas pgTAP en Postgres de Supabase con el esquema de Auth (Docker)
+./scripts/test-integration.sh          # 9 pruebas del Telar contra Postgres real (Docker)
+cd app && flutter test                 # 10 pruebas de widgets de la app
 ```
+
+Verificado el 2026-11-17 con Docker: todo lo anterior en verde, `flutter analyze` sin observaciones,
+`flutter build web` y `flutter build linux` correctos, y el stack completo con login real, RLS y semilla.
+Android e iOS no se compilaron aquí (sin SDK de Android ni macOS).
 
 | Prueba | Qué verifica | Dónde |
 |---|---|---|
@@ -184,8 +194,9 @@ cd app && flutter test                 # app Flutter
 | T-11 | Eliminar la cuenta borra los datos y cierra todas las sesiones | `supabase/tests/030_account_deletion.test.sql`, `app/test/delete_account_test.dart` |
 | T-12 | `hilvana up` en un Linux limpio con Nix deja todo funcionando | `scripts/t12-clean-linux.sh` (job `t12` de CI) |
 
-Cobertura de líneas de la lógica con pruebas unitarias: **84,5 %** (agente, laboratorio, conectores,
-Telar HTTP, CLI y MCP). La capa de Postgres se cubre con las pruebas de integración.
+Cobertura de la lógica con pruebas unitarias: **84,9 % de líneas**, 76,8 % de ramas y 87,2 % de funciones
+(agente, laboratorio, conectores, Telar HTTP, avisos push, CLI y MCP). La capa de Postgres se cubre con pgTAP y
+las pruebas de integración.
 
 ## Despliegue
 
@@ -205,7 +216,10 @@ tarjeta.** Costos y pasos: [docs/nube.md](docs/nube.md).
 - API con JWT de Supabase (JWKS o HS256), roles por espacio, CORS con orígenes explícitos, cabeceras de
   seguridad y errores sin detalles internos.
 - Agente con controles de salida (OWASP Top 10 for LLM Applications 2025) y MCP de solo lectura.
-- Contenedores multietapa con versión fija, Telar distroless no root con permisos de Deno acotados.
+- Contenedores multietapa con versión fija, Telar distroless no root con permisos de Deno acotados (red,
+  lectura y variables por nombre; `PG*` solo porque postgres.js las consulta como respaldo).
+- Avisos push por ID de instalación de Firebase (`fid` en la API HTTP v1), sin registro automático: nada se
+  registra hasta que la persona los activa, y al apagarlos o cerrar sesión el dispositivo se da de baja.
 - Deno exige 24 h de antigüedad a las dependencias nuevas (cadena de suministro, OWASP A03:2025).
 
 ## Decisiones técnicas
@@ -215,6 +229,9 @@ tarjeta.** Costos y pasos: [docs/nube.md](docs/nube.md).
 - Preferir "no enviar dos veces" antes que reintentar envíos → la API de envío no es idempotente.
 - Controles deterministas alrededor del modelo en lugar de confiar en el prompt.
 - Proveedor de IA por API compatible y embeddings locales → sin depender de un tercero.
+- Prefijo `HILVANA_` en lo que interpola docker compose → un `JWT_SECRET` global de otro proyecto no rompe
+  la firma de las claves (compose da prioridad a la shell sobre `.env`).
+- Las pruebas de base corren sobre el esquema que deja Auth (`auth migrate`), igual que en la nube.
 - Más decisiones con su justificación en [docs/arquitectura.md](docs/arquitectura.md).
 
 ## Roadmap
@@ -223,6 +240,7 @@ tarjeta.** Costos y pasos: [docs/nube.md](docs/nube.md).
 - [ ] Plantillas de WhatsApp administradas desde la app.
 - [ ] Carga del catálogo manual desde la app y desde CSV.
 - [ ] Build de iOS en Codemagic y envío a TestFlight.
+- [ ] Compilar y probar Android e iOS en teléfonos reales, con avisos push de un proyecto de Firebase propio.
 - [ ] Tarifas oficiales de WhatsApp por mercado para calcular costos por mensaje.
 
 ## Fuentes de datos y licencias

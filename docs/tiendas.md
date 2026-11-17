@@ -53,17 +53,26 @@ Cifrado en tránsito: sí (HTTPS). La app no tiene publicidad ni rastreo entre a
 
 ## Capturas
 
-| Pantalla | Archivo |
-|---|---|
-| Bandeja con conversaciones | `docs/img/bandeja.png` |
-| Conversación con el asistente y el equipo | `docs/img/conversacion.png` |
-| Ajustes con eliminar cuenta | `docs/img/ajustes.png` |
-| Entrada | `docs/img/entrada.png` |
+| Pantalla | Archivo | Tamaño |
+|---|---|---|
+| Bandeja con conversaciones | `docs/img/bandeja.png` | 2560 × 1600 (escritorio 1280 × 800 a 2x) |
+| Conversación con el asistente y el equipo | `docs/img/conversacion.png` | 1080 × 1920 (teléfono 360 × 640 a 3x) |
+| Ajustes con eliminar cuenta | `docs/img/ajustes.png` | 1080 × 1920 |
+| Entrada | `docs/img/entrada.png` | 1080 × 1920 |
+
+Se regeneran con `docker compose --profile tools run --rm screenshots` sobre el stack local con datos
+ficticios. Antes de subirlas, revisa los tamaños que pide cada tienda ese día.
 
 ## Lista de envío
 
-- [ ] Carpetas de plataforma generadas con `flutter create --platforms=android,ios` y personalizadas (nombre, ícono desde `assets/brand/icono.svg`, `targetSdk 36`).
-- [ ] Firebase configurado fuera del repositorio (`google-services.json`, `GoogleService-Info.plist`) y APNs habilitado.
+- [x] Carpetas de plataforma (`flutter create --platforms=android,ios,web,linux`) personalizadas: id
+  `io.github.diegofranciscog.hilvana`, nombre, íconos desde `assets/brand` (`scripts/app-icons.sh`) y
+  `targetSdk 36` (valor de Flutter 3.50).
+- [ ] Firma de Android con el almacén de llaves propio: `HILVANA_ANDROID_KEYSTORE`,
+  `HILVANA_ANDROID_KEYSTORE_PASSWORD`, `HILVANA_ANDROID_KEY_ALIAS` y `HILVANA_ANDROID_KEY_PASSWORD` en el
+  entorno de la shell al compilar; sin ellas el paquete sale firmado en modo depuración y Google Play lo rechaza.
+- [ ] Firebase: valores públicos por `--dart-define` (`FirebaseConfig`); en iOS, llave APNs en Firebase y las
+  capacidades Push Notifications y Remote notifications en Xcode.
 - [ ] Política de privacidad publicada (plantilla en [privacidad.md](privacidad.md)) y enlace web de eliminación de cuenta.
 - [ ] Cuenta de revisión con datos ficticios.
 - [ ] Etiquetas de privacidad y formulario de seguridad de datos según la tabla anterior.
