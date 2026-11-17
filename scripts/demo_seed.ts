@@ -320,5 +320,7 @@ await seedWorkspace({
   ],
 });
 
-console.log('Datos de demo cargados: demo@hilvana.test y agente@hilvana.test (contraseña en HILVANA_DEMO_PASSWORD de .env).');
+console.log(
+  'Datos de demo cargados: demo@hilvana.test y agente@hilvana.test (contraseña en HILVANA_DEMO_PASSWORD de .env).',
+);
 await sql.end();

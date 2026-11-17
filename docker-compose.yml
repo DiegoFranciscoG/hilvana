@@ -202,6 +202,35 @@ services:
       - deno-cache:/deno-dir
     command: ["run", "--frozen", "--allow-net=db:5432,auth:9999", "--allow-env", "--allow-read=/app/agent/evals", "scripts/demo_seed.ts"]
 
+  # Capturas para el README y las tiendas; no arranca con `up`:
+  #   docker compose --profile tools run --rm screenshots
+  screenshots:
+    profiles: ["tools"]
+    build:
+      context: docker
+      dockerfile: screenshots.Dockerfile
+    depends_on:
+      gateway:
+        condition: service_healthy
+    working_dir: /app
+    environment:
+      DENO_DIR: /deno-dir
+      DEMO_PASSWORD: ${HILVANA_DEMO_PASSWORD:?Define HILVANA_DEMO_PASSWORD (deno task cli init)}
+      TZ: America/Guayaquil
+    volumes:
+      - ./deno.json:/app/deno.json:ro
+      - ./deno.lock:/app/deno.lock:ro
+      - ./scripts:/app/scripts:ro
+      - ./docs/img:/out
+      - deno-cache:/deno-dir
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        socat TCP-LISTEN:8000,fork,reuseaddr TCP:gateway:8080 &
+        exec deno run --frozen --allow-net=localhost:8000,127.0.0.1 --allow-run=/usr/bin/chromium
+        --allow-env --allow-read=/tmp,/out --allow-write=/tmp,/out scripts/screenshots.ts
+
 volumes:
   db-data:
   deno-cache:
