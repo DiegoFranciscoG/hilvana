@@ -8,14 +8,15 @@ x-telar-env: &telar-env
   TELAR_DB_HOST: db
   TELAR_DB_PASSWORD: ${TELAR_DB_PASSWORD:?Define TELAR_DB_PASSWORD (deno task cli init)}
   SUPABASE_URL: http://gateway:8080
-  SUPABASE_SECRET_KEY: ${SERVICE_ROLE_KEY:?Define SERVICE_ROLE_KEY (deno task cli init)}
-  SUPABASE_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET (deno task cli init)}
+  SUPABASE_SECRET_KEY: ${HILVANA_SERVICE_ROLE_KEY:?Define HILVANA_SERVICE_ROLE_KEY (deno task cli init)}
+  SUPABASE_JWT_SECRET: ${HILVANA_JWT_SECRET:?Define HILVANA_JWT_SECRET (deno task cli init)}
   TELAR_ALLOWED_ORIGINS: http://localhost:8000
-  LAB_CAPTURE: ${LAB_CAPTURE:-on}
-  LOG_LEVEL: ${LOG_LEVEL:-info}
+  LAB_CAPTURE: ${HILVANA_LAB_CAPTURE:-on}
+  LOG_LEVEL: ${HILVANA_LOG_LEVEL:-info}
 
+# PG*: postgres.js consulta variables PG* como respaldo de sus opciones; solo ese prefijo, nada más.
 x-telar-allow: &telar-allow-env
-  "--allow-env=PORT,TELAR_PORT,TELAR_DB_HOST,TELAR_DB_PORT,TELAR_DB_NAME,TELAR_DB_USER,TELAR_DB_PASSWORD,TELAR_DB_SSL,SUPABASE_URL,SUPABASE_SECRET_KEY,SUPABASE_JWT_SECRET,TELAR_ALLOWED_ORIGINS,TELAR_PUBLIC_URL,TELAR_DRAIN_TOKEN,LAB_CAPTURE,LOG_LEVEL,FCM_PROJECT_ID,FCM_SERVICE_ACCOUNT_B64,WORKER_IDLE_MS"
+  "--allow-env=PORT,TELAR_PORT,TELAR_DB_HOST,TELAR_DB_PORT,TELAR_DB_NAME,TELAR_DB_USER,TELAR_DB_PASSWORD,TELAR_DB_SSL,SUPABASE_URL,SUPABASE_SECRET_KEY,SUPABASE_JWT_SECRET,TELAR_ALLOWED_ORIGINS,TELAR_PUBLIC_URL,TELAR_DRAIN_TOKEN,LAB_CAPTURE,LOG_LEVEL,FCM_PROJECT_ID,FCM_SERVICE_ACCOUNT_B64,WORKER_IDLE_MS,PG*"
 
 services:
   db:
@@ -23,8 +24,8 @@ services:
     restart: unless-stopped
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "log_min_messages=fatal"]
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD (deno task cli init)}
-      PGPASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD (deno task cli init)}
+      POSTGRES_PASSWORD: ${HILVANA_DB_PASSWORD:?Define HILVANA_DB_PASSWORD (deno task cli init)}
+      PGPASSWORD: ${HILVANA_DB_PASSWORD:?Define HILVANA_DB_PASSWORD (deno task cli init)}
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./docker/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:ro
@@ -50,7 +51,7 @@ services:
       PGHOST: db
       PGUSER: postgres
       PGDATABASE: postgres
-      PGPASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD (deno task cli init)}
+      PGPASSWORD: ${HILVANA_DB_PASSWORD:?Define HILVANA_DB_PASSWORD (deno task cli init)}
       TELAR_DB_PASSWORD: ${TELAR_DB_PASSWORD:?Define TELAR_DB_PASSWORD (deno task cli init)}
       MIGRATIONS_DIR: /migrations
     volumes:
@@ -68,7 +69,7 @@ services:
       GOTRUE_API_PORT: 9999
       API_EXTERNAL_URL: http://localhost:8000/auth/v1
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}@db:5432/postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${HILVANA_DB_PASSWORD:?Define HILVANA_DB_PASSWORD}@db:5432/postgres
       GOTRUE_SITE_URL: http://localhost:8000
       GOTRUE_URI_ALLOW_LIST: http://localhost:8000
       GOTRUE_DISABLE_SIGNUP: "false"
@@ -76,7 +77,7 @@ services:
       GOTRUE_JWT_AUD: authenticated
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
       GOTRUE_JWT_EXP: 3600
-      GOTRUE_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET}
+      GOTRUE_JWT_SECRET: ${HILVANA_JWT_SECRET:?Define HILVANA_JWT_SECRET}
       GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
       GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
       GOTRUE_MAILER_AUTOCONFIRM: "true"
@@ -95,12 +96,12 @@ services:
       migrate:
         condition: service_completed_successfully
     environment:
-      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}@db:5432/postgres
+      PGRST_DB_URI: postgres://authenticator:${HILVANA_DB_PASSWORD:?Define HILVANA_DB_PASSWORD}@db:5432/postgres
       PGRST_DB_SCHEMAS: public
       PGRST_DB_EXTRA_SEARCH_PATH: public,extensions
       PGRST_DB_MAX_ROWS: 200
       PGRST_DB_ANON_ROLE: anon
-      PGRST_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET}
+      PGRST_JWT_SECRET: ${HILVANA_JWT_SECRET:?Define HILVANA_JWT_SECRET}
       PGRST_ADMIN_SERVER_PORT: 3001
       PGRST_ADMIN_SERVER_HOST: localhost
 
@@ -115,12 +116,12 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       DB_USER: supabase_admin
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}
+      DB_PASSWORD: ${HILVANA_DB_PASSWORD:?Define HILVANA_DB_PASSWORD}
       DB_NAME: postgres
       DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
       DB_ENC_KEY: ${REALTIME_DB_ENC_KEY:?Define REALTIME_DB_ENC_KEY (16 caracteres, deno task cli init)}
-      API_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET}
-      METRICS_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET}
+      API_JWT_SECRET: ${HILVANA_JWT_SECRET:?Define HILVANA_JWT_SECRET}
+      METRICS_JWT_SECRET: ${HILVANA_JWT_SECRET:?Define HILVANA_JWT_SECRET}
       SECRET_KEY_BASE: ${REALTIME_SECRET_KEY_BASE:?Define REALTIME_SECRET_KEY_BASE (deno task cli init)}
       ERL_AFLAGS: -proto_dist inet_tcp
       DNS_NODES: "''"
@@ -172,7 +173,7 @@ services:
       - realtime
       - telar
     environment:
-      SUPABASE_ANON_KEY: ${ANON_KEY:?Define ANON_KEY (deno task cli init)}
+      SUPABASE_ANON_KEY: ${HILVANA_ANON_KEY:?Define HILVANA_ANON_KEY (deno task cli init)}
       PUBLIC_URL: http://localhost:8000
     ports:
       - "127.0.0.1:8000:8080"
@@ -188,9 +189,9 @@ services:
     working_dir: /app
     environment:
       DENO_DIR: /deno-dir
-      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY:?Define SERVICE_ROLE_KEY}
-      DEMO_PASSWORD: ${DEMO_PASSWORD:?Define DEMO_PASSWORD (deno task cli init)}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}
+      SERVICE_ROLE_KEY: ${HILVANA_SERVICE_ROLE_KEY:?Define HILVANA_SERVICE_ROLE_KEY}
+      DEMO_PASSWORD: ${HILVANA_DEMO_PASSWORD:?Define HILVANA_DEMO_PASSWORD (deno task cli init)}
+      POSTGRES_PASSWORD: ${HILVANA_DB_PASSWORD:?Define HILVANA_DB_PASSWORD}
       SEED_AUTH_URL: http://auth:9999
     # Solo lo que la semilla usa: nada de .env ni del resto del repositorio.
     volumes:

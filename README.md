@@ -14,7 +14,7 @@ Google Cloud.
 
 **Demo:** local, con datos ficticios: `deno task cli up` (o `docker compose up --build` tras `deno task cli init`)
 y abre http://localhost:8000. **Usuario de prueba:** `demo@hilvana.test`; la contraseña se genera al azar
-en `.env` (`DEMO_PASSWORD`). No hay demo pública: publicarla exige cuenta de Meta y de facturación en Google Cloud.
+en `.env` (`HILVANA_DEMO_PASSWORD`). No hay demo pública: publicarla exige cuenta de Meta y de facturación en Google Cloud.
 
 ![Bandeja de Hilvana](docs/img/bandeja.png)
 
@@ -122,9 +122,9 @@ experimental y solo existe en Linux y macOS.
 
 | Variable | Descripción | Obligatoria |
 |---|---|---|
-| `POSTGRES_PASSWORD` | Contraseña de Postgres en compose | Sí (compose) |
-| `JWT_SECRET` | Secreto HS256 de Auth autoalojado (32+ bytes) | Sí (compose) |
-| `ANON_KEY` / `SERVICE_ROLE_KEY` | JWT anon y service_role firmados con `JWT_SECRET` | Sí (compose) |
+| `HILVANA_DB_PASSWORD` | Contraseña de Postgres en compose | Sí (compose) |
+| `HILVANA_JWT_SECRET` | Secreto HS256 de Auth autoalojado (32+ bytes) | Sí (compose) |
+| `HILVANA_ANON_KEY` / `HILVANA_SERVICE_ROLE_KEY` | JWT anon y service_role firmados con `HILVANA_JWT_SECRET` | Sí (compose) |
 | `REALTIME_DB_ENC_KEY` / `REALTIME_SECRET_KEY_BASE` | Claves internas de Realtime | Sí (compose) |
 | `TELAR_DB_PASSWORD` | Contraseña del rol `hilvana_telar` | Sí |
 | `TELAR_DB_HOST`, `TELAR_DB_PORT`, `TELAR_DB_SSL` | Conexión del Telar a Postgres | Sí (fuera de compose) |
@@ -133,11 +133,15 @@ experimental y solo existe en Linux y macOS.
 | `SUPABASE_JWT_SECRET` | Solo en Auth autoalojado con HS256; en la nube se usa JWKS | No |
 | `TELAR_ALLOWED_ORIGINS` | Orígenes permitidos para la API (CORS, sin comodín) | No |
 | `TELAR_DRAIN_TOKEN` | Token del drenado en la nube (32+ caracteres) | Solo en la nube |
-| `DEMO_PASSWORD` | Contraseña del usuario de demo local | Sí (compose) |
+| `HILVANA_DEMO_PASSWORD` | Contraseña del usuario de demo local | Sí (compose) |
+| `HILVANA_LOG_LEVEL`, `HILVANA_LAB_CAPTURE` | Nivel de logs y laboratorio del Telar en compose (`LOG_LEVEL`, `LAB_CAPTURE` fuera de compose) | No |
+| `HILVANA_ANDROID_KEYSTORE`, `HILVANA_ANDROID_KEYSTORE_PASSWORD`, `HILVANA_ANDROID_KEY_ALIAS`, `HILVANA_ANDROID_KEY_PASSWORD` | Firma de publicación de Android (entorno de la shell al compilar, no `.env`) | Solo para Google Play |
 | `FCM_PROJECT_ID`, `FCM_SERVICE_ACCOUNT_B64` | Avisos push | No |
 | `HILVANA_EVAL_BASE_URL`, `HILVANA_EVAL_MODEL`, `HILVANA_EVAL_API_KEY` | Evaluación del agente con un modelo real | No |
 
-Plantilla sin valores: [.env.example](.env.example). Si falta un secreto, el servicio no arranca.
+Plantilla sin valores: [.env.example](.env.example). Si falta un secreto, el servicio no arranca. Lo que
+interpola docker compose lleva el prefijo `HILVANA_` porque compose da prioridad al entorno de la shell sobre
+`.env`: un `JWT_SECRET` global de otro proyecto dejaría las claves anon y service_role firmadas con otro secreto.
 
 ## API
 

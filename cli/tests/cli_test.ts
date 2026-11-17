@@ -51,23 +51,42 @@ Deno.test('init genera secretos que faltan y nunca sobrescribe los existentes', 
   assertEquals(await main(['init'], first.deps), 0);
   const env = parseEnv(first.files['.env']);
   assertEquals(env.get('REALTIME_DB_ENC_KEY')?.length, 16);
-  assertMatch(env.get('JWT_SECRET')!, /^[0-9a-f]{64}$/);
-  assertMatch(env.get('DEMO_PASSWORD')!, /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{10,}$/);
-  const [, payload] = env.get('ANON_KEY')!.split('.');
+  assertMatch(env.get('HILVANA_JWT_SECRET')!, /^[0-9a-f]{64}$/);
+  assertMatch(env.get('HILVANA_DEMO_PASSWORD')!, /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{10,}$/);
+  const [, payload] = env.get('HILVANA_ANON_KEY')!.split('.');
   assertEquals(JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))).role, 'anon');
-  assertFalse(first.out.join('\n').includes(env.get('JWT_SECRET')!), 'no imprime secretos');
+  assertFalse(first.out.join('\n').includes(env.get('HILVANA_JWT_SECRET')!), 'no imprime secretos');
 
   const second = harness({ files: { '.env': first.files['.env'] } });
   await main(['init'], second.deps);
-  assertEquals(parseEnv(second.files['.env']).get('JWT_SECRET'), env.get('JWT_SECRET'));
+  assertEquals(parseEnv(second.files['.env']).get('HILVANA_JWT_SECRET'), env.get('HILVANA_JWT_SECRET'));
   assertStringIncludes(second.out.join('\n'), 'ya estaba completo');
 });
 
 Deno.test('completeEnv conserva comentarios y claves no secretas', async () => {
-  const { text } = await completeEnv('# comentario\nTELAR_PORT=8787\nJWT_SECRET=\n', 1_700_000_000);
+  const { text } = await completeEnv('# comentario\nTELAR_PORT=8787\nHILVANA_JWT_SECRET=\n', 1_700_000_000);
   assertStringIncludes(text, '# comentario');
   assertStringIncludes(text, 'TELAR_PORT=8787');
-  assertMatch(parseEnv(text).get('JWT_SECRET')!, /^[0-9a-f]{64}$/);
+  assertMatch(parseEnv(text).get('HILVANA_JWT_SECRET')!, /^[0-9a-f]{64}$/);
+});
+
+Deno.test('init firma de nuevo las claves anon y service_role si el secreto JWT es nuevo', async () => {
+  const stale = ['eyJhbGciOiJIUzI1NiJ9', 'eyJyb2xlIjoiYW5vbiJ9', 'firma-vieja'].join('.');
+  const { text } = await completeEnv(`HILVANA_JWT_SECRET=\nHILVANA_ANON_KEY=${stale}\n`, 1_700_000_000);
+  const env = parseEnv(text);
+  const [head, body, signature] = env.get('HILVANA_ANON_KEY')!.split('.');
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(env.get('HILVANA_JWT_SECRET')!),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['verify'],
+  );
+  const raw = Uint8Array.from(atob(signature.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+  assert(
+    await crypto.subtle.verify('HMAC', key, raw, new TextEncoder().encode(`${head}.${body}`)),
+    'firmada con el secreto nuevo',
+  );
 });
 
 Deno.test('connect: el secreto llega por stdin a psql, nunca en la lista de argumentos', async () => {

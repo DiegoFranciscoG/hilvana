@@ -2,7 +2,7 @@
 
 | Comando | Qué hace | Efectos |
 |---|---|---|
-| `init` | Crea o completa `.env` con secretos aleatorios (contraseñas, `JWT_SECRET`, claves anon y service_role firmadas con él). | Escribe `.env` (permisos 600). No sobrescribe valores existentes ni los imprime. |
+| `init` | Crea o completa `.env` con secretos aleatorios (contraseñas, `HILVANA_JWT_SECRET`, claves anon y service_role firmadas con él). | Escribe `.env` (permisos 600). No sobrescribe valores existentes ni los imprime. |
 | `up [--no-build]` | `init` + `docker compose up -d --build` + espera a que el Telar responda. | Levanta base, Auth, API REST, Realtime, pasarela web, Telar, trabajador y datos de demo. |
 | `down [--volumes]` | Detiene los servicios. | Con `--volumes` borra la base local. |
 | `status` | `docker compose ps` y salud del Telar. | Ninguno. |

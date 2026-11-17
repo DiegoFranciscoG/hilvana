@@ -23,7 +23,8 @@ EXPOSE 8787
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
   CMD ["deno", "run", "--cached-only", "--allow-net=127.0.0.1:8787", "--allow-env=TELAR_PORT", "telar/healthcheck.ts"]
 ENTRYPOINT ["deno", "run", "--cached-only", "--no-prompt"]
+# PG*: postgres.js consulta variables PG* como respaldo de sus opciones; solo ese prefijo, nada más.
 CMD ["--allow-net=0.0.0.0:8787,graph.facebook.com,graph.instagram.com,*.myshopify.com,fcm.googleapis.com,oauth2.googleapis.com,*.supabase.co,*.pooler.supabase.com", \
-     "--allow-env=PORT,TELAR_PORT,TELAR_DB_HOST,TELAR_DB_PORT,TELAR_DB_NAME,TELAR_DB_USER,TELAR_DB_PASSWORD,TELAR_DB_SSL,SUPABASE_URL,SUPABASE_SECRET_KEY,SUPABASE_JWT_SECRET,TELAR_ALLOWED_ORIGINS,TELAR_PUBLIC_URL,TELAR_DRAIN_TOKEN,LAB_CAPTURE,LOG_LEVEL,FCM_PROJECT_ID,FCM_SERVICE_ACCOUNT_B64,WORKER_IDLE_MS", \
+     "--allow-env=PORT,TELAR_PORT,TELAR_DB_HOST,TELAR_DB_PORT,TELAR_DB_NAME,TELAR_DB_USER,TELAR_DB_PASSWORD,TELAR_DB_SSL,SUPABASE_URL,SUPABASE_SECRET_KEY,SUPABASE_JWT_SECRET,TELAR_ALLOWED_ORIGINS,TELAR_PUBLIC_URL,TELAR_DRAIN_TOKEN,LAB_CAPTURE,LOG_LEVEL,FCM_PROJECT_ID,FCM_SERVICE_ACCOUNT_B64,WORKER_IDLE_MS,PG*", \
      "--allow-read=/app/telar/config,/app/agent/config,/app/lab/config", \
      "telar/src/main.ts"]

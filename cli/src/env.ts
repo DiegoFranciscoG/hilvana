@@ -1,13 +1,14 @@
 /**
  * `hilvana init`: completa .env con secretos aleatorios para el entorno local. Nunca sobrescribe un
  * valor existente ni imprime secretos. Las claves anon/service_role de Supabase autoalojado son JWT
- * firmados con JWT_SECRET (HS256).
+ * firmados con HILVANA_JWT_SECRET (HS256). Los nombres que interpola docker compose llevan el prefijo
+ * HILVANA_ porque compose da prioridad al entorno de la shell sobre .env.
  */
 import { bytesToBase64 } from '../../telar/connectors/crypto.ts';
 
 const RANDOM_HEX: Record<string, number> = {
-  POSTGRES_PASSWORD: 24,
-  JWT_SECRET: 32,
+  HILVANA_DB_PASSWORD: 24,
+  HILVANA_JWT_SECRET: 32,
   TELAR_DB_PASSWORD: 24,
   REALTIME_SECRET_KEY_BASE: 32,
   TELAR_DRAIN_TOKEN: 24,
@@ -67,11 +68,15 @@ export async function completeEnv(template: string, nowSeconds: number): Promise
   };
   for (const [key, bytes] of Object.entries(RANDOM_HEX)) set(key, randomHex(bytes));
   set('REALTIME_DB_ENC_KEY', randomHex(8)); // 16 caracteres exactos
-  set('DEMO_PASSWORD', demoPassword());
-  const secret = values.get('JWT_SECRET')!;
+  set('HILVANA_DEMO_PASSWORD', demoPassword());
+  const secret = values.get('HILVANA_JWT_SECRET')!;
+  const freshSecret = added.includes('HILVANA_JWT_SECRET');
   const exp = nowSeconds + 5 * 365 * 24 * 3600;
-  set('ANON_KEY', await signHs256({ role: 'anon', iss: 'supabase', iat: nowSeconds, exp }, secret));
-  set('SERVICE_ROLE_KEY', await signHs256({ role: 'service_role', iss: 'supabase', iat: nowSeconds, exp }, secret));
+  for (const [key, role] of [['HILVANA_ANON_KEY', 'anon'], ['HILVANA_SERVICE_ROLE_KEY', 'service_role']]) {
+    // Las claves siempre corresponden al secreto: con un secreto nuevo se firman de nuevo.
+    if (freshSecret) values.delete(key);
+    set(key, await signHs256({ role, iss: 'supabase', iat: nowSeconds, exp }, secret));
+  }
 
   const lines = template.split(/\r?\n/).map((line) => {
     const match = line.match(/^\s*([A-Z][A-Z0-9_]*)\s*=/);

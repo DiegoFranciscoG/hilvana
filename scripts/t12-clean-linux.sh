@@ -16,9 +16,9 @@ curl -fsS http://localhost:8000/auth/v1/health >/dev/null
 docker compose wait seed >/dev/null
 set -a; source .env; set +a
 TOKEN=$(curl -fsS -X POST 'http://localhost:8000/auth/v1/token?grant_type=password' \
-  -H "apikey: ${ANON_KEY}" -H 'Content-Type: application/json' \
-  -d "{\"email\":\"demo@hilvana.test\",\"password\":\"${DEMO_PASSWORD}\"}" | jq -r .access_token)
-COUNT=$(curl -fsS 'http://localhost:8000/rest/v1/workspace?select=slug' -H "apikey: ${ANON_KEY}" -H "Authorization: Bearer ${TOKEN}" | jq length)
+  -H "apikey: ${HILVANA_ANON_KEY}" -H 'Content-Type: application/json' \
+  -d "{\"email\":\"demo@hilvana.test\",\"password\":\"${HILVANA_DEMO_PASSWORD}\"}" | jq -r .access_token)
+COUNT=$(curl -fsS 'http://localhost:8000/rest/v1/workspace?select=slug' -H "apikey: ${HILVANA_ANON_KEY}" -H "Authorization: Bearer ${TOKEN}" | jq length)
 test "$COUNT" -ge 1
 echo "T-12 en verde: la demo ve $COUNT espacios propios."
 

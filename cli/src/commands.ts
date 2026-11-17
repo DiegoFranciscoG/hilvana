@@ -118,8 +118,8 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
       io.print('  Bandeja web:   http://localhost:8000');
       io.print('  API del Telar: http://localhost:8000/telar/openapi.json');
       io.print(
-        `  Usuario demo:  demo@hilvana.test (contraseña en .env, DEMO_PASSWORD${
-          env.get('DEMO_PASSWORD') ? '' : ' — falta'
+        `  Usuario demo:  demo@hilvana.test (contraseña en .env, HILVANA_DEMO_PASSWORD${
+          env.get('HILVANA_DEMO_PASSWORD') ? '' : ' — falta'
         })`,
       );
       return 0;
