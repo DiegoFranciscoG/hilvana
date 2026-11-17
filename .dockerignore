@@ -13,6 +13,12 @@ lab/.captures
 supabase/.temp
 supabase/.branches
 *.log
+# Proyectos nativos y archivos generados de Flutter: la imagen web solo compila lib/, assets/ y web/.
+app/android
+app/ios
+app/linux
+app/.flutter-plugins-dependencies
+**/ephemeral
 # Documentos de trabajo y originales de marca de la raíz: nunca viajan al contexto de build.
 *.docx
 ~$*
