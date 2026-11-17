@@ -1,5 +1,5 @@
 {
-  description = "Hilvana: entorno de desarrollo reproducible (deno, CLI de Supabase, psql, cloudflared, gitleaks)";
+  description = "Hilvana: entorno de desarrollo reproducible (deno, node, psql, cloudflared, gitleaks)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -14,11 +14,12 @@
     in
     {
       # Docker (motor y compose) es del sistema: Nix no administra servicios.
+      # La CLI de Supabase va por `npx supabase@<versión de toolchain.env>`: nixpkgs trae otra versión mayor.
       devShells = forAll (pkgs: unstable: {
         default = pkgs.mkShell {
           packages = [
             unstable.deno
-            unstable.supabase-cli
+            pkgs.nodejs
             pkgs.postgresql_17
             pkgs.cloudflared
             pkgs.gitleaks
