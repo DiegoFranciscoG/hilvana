@@ -48,7 +48,12 @@ export function decideSend(policies: ChannelPolicies, request: SendRequest): Sen
   const insideWindow = windowExpiresAt !== null && request.now.getTime() < windowExpiresAt.getTime();
 
   if (insideWindow) {
-    return { allowed: true, mode: request.contentKind === 'template' ? 'template' : 'free_text', reason: 'inside_window', windowExpiresAt };
+    return {
+      allowed: true,
+      mode: request.contentKind === 'template' ? 'template' : 'free_text',
+      reason: 'inside_window',
+      windowExpiresAt,
+    };
   }
 
   if (policy.outsideWindow === 'template_only' && request.contentKind === 'template') {

@@ -4,7 +4,17 @@
  */
 import type { ChannelType } from '../../sdk/ts/envelope.ts';
 import { anonymize, findPersonalData, type LabConfig } from './anonymize.ts';
-import { canonicalJson, diffSchemas, formatChanges, hashSchema, inferSchema, type JsonSchema, mergeSchemas, type SchemaChange, sha256Hex } from './schema.ts';
+import {
+  canonicalJson,
+  diffSchemas,
+  formatChanges,
+  hashSchema,
+  inferSchema,
+  type JsonSchema,
+  mergeSchemas,
+  type SchemaChange,
+  sha256Hex,
+} from './schema.ts';
 
 export interface StoredContract {
   id: string;
@@ -45,7 +55,11 @@ export interface CaptureInput {
   payload: unknown;
 }
 
-export async function captureWebhook(store: ContractStore, config: LabConfig, input: CaptureInput): Promise<CaptureOutcome[]> {
+export async function captureWebhook(
+  store: ContractStore,
+  config: LabConfig,
+  input: CaptureInput,
+): Promise<CaptureOutcome[]> {
   const sample = anonymize(input.payload, config);
   const serialized = canonicalJson(sample);
   const leaks = findPersonalData(serialized);

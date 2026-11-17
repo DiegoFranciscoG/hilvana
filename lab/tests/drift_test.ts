@@ -25,13 +25,20 @@ Deno.test('T-09 un campo nuevo genera una alerta de deriva con su diff', async (
   const [again] = await captureWebhook(store, config, { channel: 'whatsapp', eventKeys: keys, payload: text });
   assertEquals(again.result, 'unchanged');
 
-  const [drift] = await captureWebhook(store, config, { channel: 'whatsapp', eventKeys: keys, payload: withNewField(text) });
+  const [drift] = await captureWebhook(store, config, {
+    channel: 'whatsapp',
+    eventKeys: keys,
+    payload: withNewField(text),
+  });
   assertEquals(drift.result, 'drift');
   if (drift.result !== 'drift') return;
   assertEquals(drift.contract.version, 2);
   const added = drift.alert.changes.find((c) => c.kind === 'added');
   assertEquals(added?.path, 'entry[].changes[].value.messages[].text.preview_url');
-  assertStringIncludes(drift.alert.summary, '+ entry[].changes[].value.messages[].text.preview_url: boolean (campo nuevo)');
+  assertStringIncludes(
+    drift.alert.summary,
+    '+ entry[].changes[].value.messages[].text.preview_url: boolean (campo nuevo)',
+  );
   assertEquals(store.alerts.length, 1);
 });
 
@@ -48,19 +55,30 @@ Deno.test('durante el aprendizaje inicial la forma se afina sin alertas', async 
   const learning = { ...config, learningSamples: 5 };
   const keys = ['whatsapp.messages.text'];
   await captureWebhook(store, learning, { channel: 'whatsapp', eventKeys: keys, payload: text });
-  const [second] = await captureWebhook(store, learning, { channel: 'whatsapp', eventKeys: keys, payload: withNewField(text) });
+  const [second] = await captureWebhook(store, learning, {
+    channel: 'whatsapp',
+    eventKeys: keys,
+    payload: withNewField(text),
+  });
   assertEquals(second.result, 'learning');
   assertEquals(store.alerts.length, 0);
   assertEquals(store.contracts.length, 1);
 });
 
 Deno.test('la huella del esquema no depende del orden de las claves', async () => {
-  assertEquals(await hashSchema(inferSchema({ a: 1, b: { c: '<text>' } })), await hashSchema(inferSchema({ b: { c: '<text>' }, a: 2 })));
+  assertEquals(
+    await hashSchema(inferSchema({ a: 1, b: { c: '<text>' } })),
+    await hashSchema(inferSchema({ b: { c: '<text>' }, a: 2 })),
+  );
 });
 
 Deno.test('tipos generados en TypeScript y Dart', async () => {
   const store = new MemoryContractStore();
-  const [outcome] = await captureWebhook(store, config, { channel: 'whatsapp', eventKeys: ['whatsapp.messages.text'], payload: text });
+  const [outcome] = await captureWebhook(store, config, {
+    channel: 'whatsapp',
+    eventKeys: ['whatsapp.messages.text'],
+    payload: text,
+  });
   const ts = toTypeScript('whatsapp.messages.text', outcome.contract.schema);
   assertStringIncludes(ts, 'export type WhatsappMessagesText = {');
   assertStringIncludes(ts, 'object: "whatsapp_business_account";');

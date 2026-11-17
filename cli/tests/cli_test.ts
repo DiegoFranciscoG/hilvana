@@ -8,7 +8,15 @@ import { findTunnelUrl, tunnelCommand } from '../src/tunnel.ts';
 
 const example = await Deno.readTextFile(new URL('../../.env.example', import.meta.url));
 
-function harness(options: { stdin?: string; answer?: string; env?: Record<string, string>; files?: Record<string, string>; psqlStdout?: string } = {}) {
+function harness(
+  options: {
+    stdin?: string;
+    answer?: string;
+    env?: Record<string, string>;
+    files?: Record<string, string>;
+    psqlStdout?: string;
+  } = {},
+) {
   const calls: { command: string[]; options?: RunOptions }[] = [];
   const out: string[] = [];
   const err: string[] = [];
@@ -71,11 +79,24 @@ Deno.test('connect: el secreto llega por stdin a psql, nunca en la lista de argu
     verifyToken: ['verificar', '123456'].join('-'),
   };
   const h = harness({ stdin: JSON.stringify(secret), psqlStdout: JSON.stringify([{ id: credentialId }]) });
-  const code = await main(['connect', 'meta', '--space', 'panaderia', '--label', 'Meta', '--channel', 'whatsapp', '--external-id', '110000000000001'], h.deps);
+  const code = await main([
+    'connect',
+    'meta',
+    '--space',
+    'panaderia',
+    '--label',
+    'Meta',
+    '--channel',
+    'whatsapp',
+    '--external-id',
+    '110000000000001',
+  ], h.deps);
   assertEquals(code, 0);
   const psql = h.calls.filter((c) => c.command.includes('psql'));
   assertEquals(psql.length, 2);
-  for (const call of psql) assertFalse(call.command.join(' ').includes('access-token'), 'el secreto no va en argumentos');
+  for (const call of psql) {
+    assertFalse(call.command.join(' ').includes('access-token'), 'el secreto no va en argumentos');
+  }
   assertStringIncludes(psql[0].options!.stdin!, "\\set secret '");
   // JSON escapa la barra (\\) y psql la vuelve a escapar dentro del literal (\\\\).
   assertStringIncludes(psql[0].options!.stdin!, "app''secret\\\\\\\\x123456");
@@ -101,10 +122,24 @@ Deno.test('psqlLiteral escapa comillas y barras y rechaza saltos de línea', () 
   assert(threw);
 });
 
-const deployArgs = ['deploy', '--project', 'hilvana-demo-123', '--region', 'us-central1', '--supabase-url', 'https://abc.supabase.co', '--db-host', 'db.abc.supabase.co'];
+const deployArgs = [
+  'deploy',
+  '--project',
+  'hilvana-demo-123',
+  '--region',
+  'us-central1',
+  '--supabase-url',
+  'https://abc.supabase.co',
+  '--db-host',
+  'db.abc.supabase.co',
+];
 
 Deno.test('deploy muestra el plan y no ejecuta nada sin confirmación', async () => {
-  const env = { TELAR_DB_PASSWORD: 'pw-local-123', SUPABASE_SECRET_KEY: 'clave-local', TELAR_DRAIN_TOKEN: 'token-local' };
+  const env = {
+    TELAR_DB_PASSWORD: 'pw-local-123',
+    SUPABASE_SECRET_KEY: 'clave-local',
+    TELAR_DRAIN_TOKEN: 'token-local',
+  };
   const declined = harness({ env, answer: 'no' });
   assertEquals(await main(deployArgs, declined.deps), 0);
   assertEquals(declined.calls.length, 0);
@@ -117,12 +152,18 @@ Deno.test('deploy con confirmación pasa los secretos por stdin y exige las vari
   assertEquals(await main(deployArgs, missing.deps), 1);
   assertStringIncludes(missing.err.join('\n'), 'TELAR_DB_PASSWORD');
 
-  const env = { TELAR_DB_PASSWORD: 'pw-local-123', SUPABASE_SECRET_KEY: 'clave-local', TELAR_DRAIN_TOKEN: 'token-local' };
+  const env = {
+    TELAR_DB_PASSWORD: 'pw-local-123',
+    SUPABASE_SECRET_KEY: 'clave-local',
+    TELAR_DRAIN_TOKEN: 'token-local',
+  };
   const confirmed = harness({ env, answer: 'sí' });
   assertEquals(await main(deployArgs, confirmed.deps), 0);
   assert(confirmed.calls.length > 5);
   for (const call of confirmed.calls) {
-    for (const value of Object.values(env)) assertFalse(call.command.join(' ').includes(value), 'secreto en argumentos');
+    for (const value of Object.values(env)) {
+      assertFalse(call.command.join(' ').includes(value), 'secreto en argumentos');
+    }
   }
   assertEquals(confirmed.calls.filter((c) => c.options?.stdin === 'pw-local-123').length, 1);
 
@@ -131,7 +172,13 @@ Deno.test('deploy con confirmación pasa los secretos por stdin y exige las vari
 });
 
 Deno.test('plan de despliegue: Cloud Run escala a cero y usa Secret Manager', () => {
-  const steps = deployPlan({ project: 'hilvana-demo-123', region: 'us-central1', tag: 'v1', supabaseUrl: 'https://abc.supabase.co', dbHost: 'db.abc.supabase.co' });
+  const steps = deployPlan({
+    project: 'hilvana-demo-123',
+    region: 'us-central1',
+    tag: 'v1',
+    supabaseUrl: 'https://abc.supabase.co',
+    dbHost: 'db.abc.supabase.co',
+  });
   const run = steps.find((s) => s.command.includes('deploy'))!.command.join(' ');
   assertStringIncludes(run, '--min-instances=0');
   assertStringIncludes(run, '--set-secrets=TELAR_DB_PASSWORD=hilvana-telar-db-password:latest');
@@ -139,11 +186,17 @@ Deno.test('plan de despliegue: Cloud Run escala a cero y usa Secret Manager', ()
 });
 
 Deno.test('túnel: binario local o imagen oficial fijada, y detección de la URL', () => {
-  assertEquals(tunnelCommand({ port: 8000, hasBinary: true, cloudflaredVersion: '2026.11.0', linux: true })[0], 'cloudflared');
+  assertEquals(
+    tunnelCommand({ port: 8000, hasBinary: true, cloudflaredVersion: '2026.11.0', linux: true })[0],
+    'cloudflared',
+  );
   const docker = tunnelCommand({ port: 8000, hasBinary: false, cloudflaredVersion: '2026.11.0', linux: true });
   assert(docker.includes('cloudflare/cloudflared:2026.11.0'));
   assert(docker.includes('host.docker.internal:host-gateway'));
-  assertEquals(findTunnelUrl('INF |  https://lino-hilo-aguja.trycloudflare.com  |'), 'https://lino-hilo-aguja.trycloudflare.com');
+  assertEquals(
+    findTunnelUrl('INF |  https://lino-hilo-aguja.trycloudflare.com  |'),
+    'https://lino-hilo-aguja.trycloudflare.com',
+  );
   assertEquals(findTunnelUrl('nada aquí'), null);
 });
 

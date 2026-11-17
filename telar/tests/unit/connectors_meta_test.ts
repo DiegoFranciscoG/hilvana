@@ -59,7 +59,10 @@ Deno.test('WhatsApp: texto, imagen y estado se traducen al sobre interno', async
 Deno.test('WhatsApp: cargas ajenas o incompletas no producen eventos', () => {
   assertEquals(parseWhatsAppWebhook({ object: 'page', entry: [] }), []);
   assertEquals(parseWhatsAppWebhook(null), []);
-  assertEquals(parseWhatsAppWebhook({ object: 'whatsapp_business_account', entry: [{ changes: [{ value: {} }] }] }), []);
+  assertEquals(
+    parseWhatsAppWebhook({ object: 'whatsapp_business_account', entry: [{ changes: [{ value: {} }] }] }),
+    [],
+  );
 });
 
 Deno.test('Messenger e Instagram: texto entra, eco se ignora', async () => {
@@ -74,7 +77,10 @@ Deno.test('Messenger e Instagram: texto entra, eco se ignora', async () => {
 
   const echo = {
     object: 'page',
-    entry: [{ id: '1', messaging: [{ sender: { id: '1' }, timestamp: 1, message: { mid: 'm1', text: 'x', is_echo: true } }] }],
+    entry: [{
+      id: '1',
+      messaging: [{ sender: { id: '1' }, timestamp: 1, message: { mid: 'm1', text: 'x', is_echo: true } }],
+    }],
   };
   assertEquals(parseMessagingWebhook(echo), []);
 });
@@ -123,9 +129,12 @@ Deno.test('GraphClient: envía con Bearer y no filtra el token en los errores', 
     baseUrl: 'https://graph.example.test',
     version: 'v27.0',
     accessToken: 'TOKEN-SECRETO-123',
-    fetch: () => Promise.resolve(Response.json({ error: { code: 131047, message: 'Re-engagement message' } }, { status: 400 })),
+    fetch: () =>
+      Promise.resolve(Response.json({ error: { code: 131047, message: 'Re-engagement message' } }, { status: 400 })),
   });
-  const error = await assertRejects(() => sendWhatsApp(failing, '110000000000001', '593991234567', { kind: 'text', text: 'Hola' }));
+  const error = await assertRejects(() =>
+    sendWhatsApp(failing, '110000000000001', '593991234567', { kind: 'text', text: 'Hola' })
+  );
   assertFalse(String(error).includes('TOKEN-SECRETO-123'));
   assert(String(error).includes('131047'));
   assertThrows(() => new GraphClient({ baseUrl: 'https://x.test', version: '27', accessToken: 't' }));

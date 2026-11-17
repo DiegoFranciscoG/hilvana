@@ -62,10 +62,17 @@ export class CatalogResponder implements ModelProvider {
     } else if (best) {
       const parts = [best.title + (best.detail && best.detail !== best.title ? `: ${best.detail}` : '') + '.'];
       if (asksPrice && best.price !== null) parts.push(`Cuesta ${formatMoney(best.price, best.currency)}.`);
-      if (best.stock !== null) parts.push(best.stock > 0 ? `Hay ${best.stock} disponibles.` : 'Por ahora está agotado.');
+      if (best.stock !== null) {
+        parts.push(best.stock > 0 ? `Hay ${best.stock} disponibles.` : 'Por ahora está agotado.');
+      }
       output = { reply: parts.join(' '), intent: 'answer', mentionedProducts: [best.title], leadInterest: best.title };
     } else if (words.length === 0) {
-      output = { reply: '¡Hola! ¿En qué te puedo ayudar?', intent: 'answer', mentionedProducts: [], leadInterest: null };
+      output = {
+        reply: '¡Hola! ¿En qué te puedo ayudar?',
+        intent: 'answer',
+        mentionedProducts: [],
+        leadInterest: null,
+      };
     } else {
       output = {
         reply: 'No encuentro eso en nuestro catálogo. Si quieres, te paso con una persona del equipo.',

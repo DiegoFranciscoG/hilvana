@@ -1,5 +1,13 @@
 import { assert, assertEquals } from '@std/assert';
-import { adminSql, buildTelar, createWorkspace, dropWorkspace, postWebhook, queueLength, whatsappText } from './_harness.ts';
+import {
+  adminSql,
+  buildTelar,
+  createWorkspace,
+  dropWorkspace,
+  postWebhook,
+  queueLength,
+  whatsappText,
+} from './_harness.ts';
 
 const admin = adminSql();
 const telar = await buildTelar();
@@ -35,7 +43,9 @@ Deno.test({
     const ws = await createWorkspace(admin, telar.sql);
     try {
       telar.sent.length = 0;
-      const payload = whatsappText(ws, '¿Cuánto cuesta la docena de pan de yuca?', { wamid: `wamid.repetido.${ws.slug}` });
+      const payload = whatsappText(ws, '¿Cuánto cuesta la docena de pan de yuca?', {
+        wamid: `wamid.repetido.${ws.slug}`,
+      });
       assertEquals((await postWebhook(telar.app, ws, payload)).status, 200);
       assertEquals((await postWebhook(telar.app, ws, payload)).status, 200);
       await telar.drainer.drainOnce(ws.id);
@@ -73,11 +83,15 @@ Deno.test({
       const [agent] = await admin<{ status: string }[]>`
         select status from public.message where workspace_id = ${ws.id} and author = 'agent'`;
       assertEquals(agent.status, 'blocked');
-      const [handoff] = await admin<{ reason: string }[]>`select reason from public.handoff where workspace_id = ${ws.id}`;
+      const [handoff] = await admin<
+        { reason: string }[]
+      >`select reason from public.handoff where workspace_id = ${ws.id}`;
       assertEquals(handoff.reason, 'window_closed');
       assertEquals(telar.sent.length, 0, 'nada salió hacia el cliente');
 
-      const [conversation] = await admin<{ id: string }[]>`select id from public.conversation where workspace_id = ${ws.id}`;
+      const [conversation] = await admin<
+        { id: string }[]
+      >`select id from public.conversation where workspace_id = ${ws.id}`;
       const human = await telar.app.request(`/api/conversations/${conversation.id}/messages`, {
         method: 'POST',
         headers: { Authorization: `Bearer user:${ws.ownerId}`, 'Content-Type': 'application/json' },
@@ -98,13 +112,23 @@ Deno.test({
   fn: async () => {
     const ws = await createWorkspace(admin, telar.sql, { agent: false });
     try {
-      await postWebhook(telar.app, ws, whatsappText(ws, 'Soy Rodrigo, mi correo es rodrigo@correo.test', { from: '593987770001' }));
+      await postWebhook(
+        telar.app,
+        ws,
+        whatsappText(ws, 'Soy Rodrigo, mi correo es rodrigo@correo.test', { from: '593987770001' }),
+      );
       await telar.drainer.drainOnce(ws.id);
-      const [contract] = await admin<{ event_key: string }[]>`select event_key from public.contract where workspace_id = ${ws.id}`;
+      const [contract] = await admin<
+        { event_key: string }[]
+      >`select event_key from public.contract where workspace_id = ${ws.id}`;
       assertEquals(contract.event_key, 'whatsapp.messages.text');
-      const samples = await admin<{ payload: unknown }[]>`select payload from public.contract_sample where workspace_id = ${ws.id}`;
+      const samples = await admin<
+        { payload: unknown }[]
+      >`select payload from public.contract_sample where workspace_id = ${ws.id}`;
       const text = JSON.stringify(samples);
-      for (const leak of ['Rodrigo', 'rodrigo@correo.test', '593987770001']) assert(!text.includes(leak), `la muestra contiene ${leak}`);
+      for (const leak of ['Rodrigo', 'rodrigo@correo.test', '593987770001']) {
+        assert(!text.includes(leak), `la muestra contiene ${leak}`);
+      }
     } finally {
       await dropWorkspace(admin, ws);
     }

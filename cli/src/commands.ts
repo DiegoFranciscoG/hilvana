@@ -5,7 +5,16 @@
 import { parseArgs } from '@std/cli';
 import { deployPlan, POST_DEPLOY_NOTES, renderPlan, validateDeployOptions } from './deploy.ts';
 import { completeEnv, parseEnv } from './env.ts';
-import { COMPOSE, contractAlerts, createWorkspace, listContracts, listWorkspaces, storeCredential, addChannel, waitForHealthy } from './local.ts';
+import {
+  addChannel,
+  COMPOSE,
+  contractAlerts,
+  createWorkspace,
+  listContracts,
+  listWorkspaces,
+  storeCredential,
+  waitForHealthy,
+} from './local.ts';
 import type { Io, Runner } from './runner.ts';
 import { findTunnelUrl, tunnelCommand, webhookInstructions } from './tunnel.ts';
 
@@ -46,7 +55,22 @@ const SECRET_SHAPES: Record<string, string[]> = {
 
 export async function main(argv: string[], deps: CliDeps): Promise<number> {
   const args = parseArgs(argv, {
-    string: ['port', 'space', 'label', 'channel', 'external-id', 'public', 'slug', 'country', 'plan', 'project', 'region', 'tag', 'supabase-url', 'db-host'],
+    string: [
+      'port',
+      'space',
+      'label',
+      'channel',
+      'external-id',
+      'public',
+      'slug',
+      'country',
+      'plan',
+      'project',
+      'region',
+      'tag',
+      'supabase-url',
+      'db-host',
+    ],
     boolean: ['yes', 'volumes', 'no-build', 'alerts', 'help'],
   });
   const [command, sub, ...rest] = args._.map(String);
@@ -66,7 +90,11 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
       }
       const { text, added } = await completeEnv(current, Math.floor(Date.now() / 1000));
       await deps.writeFile('.env', text);
-      io.print(added.length ? `.env listo. Generé: ${added.join(', ')} (los valores quedan solo en .env).` : '.env ya estaba completo.');
+      io.print(
+        added.length
+          ? `.env listo. Generé: ${added.join(', ')} (los valores quedan solo en .env).`
+          : '.env ya estaba completo.',
+      );
       return 0;
     }
 
@@ -89,7 +117,11 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
       io.print('Hilvana está en marcha:');
       io.print('  Bandeja web:   http://localhost:8000');
       io.print('  API del Telar: http://localhost:8000/telar/openapi.json');
-      io.print(`  Usuario demo:  demo@hilvana.test (contraseña en .env, DEMO_PASSWORD${env.get('DEMO_PASSWORD') ? '' : ' — falta'})`);
+      io.print(
+        `  Usuario demo:  demo@hilvana.test (contraseña en .env, DEMO_PASSWORD${
+          env.get('DEMO_PASSWORD') ? '' : ' — falta'
+        })`,
+      );
       return 0;
     }
 
@@ -107,11 +139,19 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
 
     case 'tunnel': {
       const port = Number(args.port ?? '8000');
-      const hasBinary = (await run(['cloudflared', '--version']).catch(() => ({ code: 1, stdout: '', stderr: '' }))).code === 0;
-      const cmd = tunnelCommand({ port, hasBinary, cloudflaredVersion: deps.versions.CLOUDFLARED_VERSION, linux: deps.platform === 'linux' });
+      const hasBinary =
+        (await run(['cloudflared', '--version']).catch(() => ({ code: 1, stdout: '', stderr: '' }))).code === 0;
+      const cmd = tunnelCommand({
+        port,
+        hasBinary,
+        cloudflaredVersion: deps.versions.CLOUDFLARED_VERSION,
+        linux: deps.platform === 'linux',
+      });
       io.print(`Abriendo túnel (solo para pruebas): ${cmd.join(' ')}`);
       io.print('Cloudflare imprimirá la URL pública; úsala como base de las URLs de abajo. Ctrl+C para cerrar.');
-      const credentials = await listWorkspaces(run).then((rows) => rows.flatMap((w) => w.credentials ?? [])).catch(() => []);
+      const credentials = await listWorkspaces(run).then((rows) => rows.flatMap((w) => w.credentials ?? [])).catch(
+        () => [],
+      );
       for (const line of webhookInstructions('https://<subdominio>.trycloudflare.com', credentials)) io.print(line);
       const result = await run(cmd, { inherit: true });
       return result.code;
@@ -123,7 +163,9 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
         if (rows.length === 0) io.print('No hay espacios todavía.');
         for (const w of rows) {
           io.print(`${w.slug}  ${w.name}  (${w.country_code}, plan ${w.plan_code})`);
-          for (const c of w.credentials ?? []) io.print(`    credencial ${c.provider} ${c.id}  ${c.label} [${c.status}]`);
+          for (const c of w.credentials ?? []) {
+            io.print(`    credencial ${c.provider} ${c.id}  ${c.label} [${c.status}]`);
+          }
           for (const ch of w.channels ?? []) io.print(`    canal ${ch.type} ${ch.external_id} [${ch.status}]`);
         }
         return 0;
@@ -131,7 +173,10 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
       if (sub === 'create') {
         const name = rest.join(' ') || '';
         const slug = args.slug ?? '';
-        if (name.length < 2 || !/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(slug) || !/^[A-Za-z]{2}$/.test(args.country ?? '')) {
+        if (
+          name.length < 2 || !/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(slug) ||
+          !/^[A-Za-z]{2}$/.test(args.country ?? '')
+        ) {
           io.error('Uso: hilvana space create "Nombre" --slug mi-negocio --country EC');
           return 1;
         }
@@ -146,7 +191,9 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
     case 'connect': {
       const provider = sub;
       if (!provider || !(provider in SECRET_SHAPES) || !args.space || !args.label) {
-        io.error('Uso: echo \'{"appSecret":"…","accessToken":"…","verifyToken":"…"}\' | hilvana connect meta --space <slug> --label <texto>');
+        io.error(
+          'Uso: echo \'{"appSecret":"…","accessToken":"…","verifyToken":"…"}\' | hilvana connect meta --space <slug> --label <texto>',
+        );
         return 1;
       }
       if (rest.length > 0) {
@@ -160,7 +207,9 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
         io.error('La entrada estándar debe ser un JSON con el secreto.');
         return 1;
       }
-      const missing = SECRET_SHAPES[provider].filter((k) => typeof secret[k] !== 'string' || (secret[k] as string).length < 8);
+      const missing = SECRET_SHAPES[provider].filter((k) =>
+        typeof secret[k] !== 'string' || (secret[k] as string).length < 8
+      );
       if (missing.length) {
         io.error(`Faltan campos del secreto: ${missing.join(', ')}`);
         return 1;
@@ -211,7 +260,11 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
       const rows = await listContracts(run, args.space);
       if (rows.length === 0) io.print('Todavía no hay contratos: llegan con el primer webhook.');
       for (const c of rows) {
-        io.print(`${c.slug.padEnd(22)} ${c.event_key.padEnd(34)} v${c.version}  muestras ${c.sample_count}${c.open_alerts ? `  alertas ${c.open_alerts}` : ''}`);
+        io.print(
+          `${c.slug.padEnd(22)} ${c.event_key.padEnd(34)} v${c.version}  muestras ${c.sample_count}${
+            c.open_alerts ? `  alertas ${c.open_alerts}` : ''
+          }`,
+        );
       }
       return 0;
     }
@@ -237,14 +290,20 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
         io.error(`Antes de ejecutar define en tu entorno: ${[...new Set(missing)].join(', ')}`);
         return 1;
       }
-      const answer = args.yes ? 'sí' : (await io.ask(`¿Ejecutar estos ${steps.length} pasos en el proyecto ${options.project}? Escribe "sí": `)).trim().toLowerCase();
+      const answer = args.yes
+        ? 'sí'
+        : (await io.ask(`¿Ejecutar estos ${steps.length} pasos en el proyecto ${options.project}? Escribe "sí": `))
+          .trim().toLowerCase();
       if (answer !== 'sí' && answer !== 'si') {
         io.print('No se ejecutó nada.');
         return 0;
       }
       for (const step of steps) {
         io.print(`→ ${step.description}`);
-        const result = await run(step.command, step.stdinFromEnv ? { stdin: deps.env(step.stdinFromEnv)! } : { inherit: true });
+        const result = await run(
+          step.command,
+          step.stdinFromEnv ? { stdin: deps.env(step.stdinFromEnv)! } : { inherit: true },
+        );
         if (result.code !== 0 && !step.tolerateFailure) {
           io.error(`Falló: ${step.command.slice(0, 4).join(' ')}…`);
           return result.code;

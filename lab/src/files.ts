@@ -51,7 +51,10 @@ export class FileContractStore implements ContractStore {
 
   async #write(contract: StoredContract): Promise<void> {
     await Deno.mkdir(this.#dir(contract.eventKey), { recursive: true });
-    await Deno.writeTextFile(join(this.#dir(contract.eventKey), `v${contract.version}.json`), JSON.stringify(JSON.parse(canonicalJson(contract)), null, 2) + '\n');
+    await Deno.writeTextFile(
+      join(this.#dir(contract.eventKey), `v${contract.version}.json`),
+      JSON.stringify(JSON.parse(canonicalJson(contract)), null, 2) + '\n',
+    );
   }
 
   async create(input: Omit<StoredContract, 'id' | 'sampleCount'>): Promise<StoredContract> {
@@ -86,6 +89,8 @@ export class FileContractStore implements ContractStore {
 
   async addAlert(alert: DriftAlert): Promise<void> {
     const path = join(this.root, 'alerts.jsonl');
-    await Deno.writeTextFile(path, JSON.stringify({ ...alert, createdAt: new Date().toISOString() }) + '\n', { append: true });
+    await Deno.writeTextFile(path, JSON.stringify({ ...alert, createdAt: new Date().toISOString() }) + '\n', {
+      append: true,
+    });
   }
 }

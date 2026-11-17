@@ -38,6 +38,7 @@ jobs:
         with:
           deno-version: 2.9.8
       - run: deno lint
+      - run: deno task fmt
       - run: deno task check
       - name: Pruebas unitarias (T-01, T-04, T-05, T-06, T-07, T-08, T-09) con cobertura
         run: deno task test

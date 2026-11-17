@@ -22,7 +22,13 @@ export interface DrainOptions {
   concurrency: number;
 }
 
-export const DEFAULT_DRAIN: DrainOptions = { batchSize: 20, visibilitySeconds: 60, deferSeconds: 20, maxAttempts: 5, concurrency: 4 };
+export const DEFAULT_DRAIN: DrainOptions = {
+  batchSize: 20,
+  visibilitySeconds: 60,
+  deferSeconds: 20,
+  maxAttempts: 5,
+  concurrency: 4,
+};
 
 export class WorkspaceDrainer implements Drainer {
   #cursor = 0;
@@ -93,7 +99,12 @@ export class WorkspaceDrainer implements Drainer {
         }
         try {
           const found = await tx.savepoint((sp) =>
-            processWebhook(sp, { workspaceId, config: this.deps.config, labConfig: this.deps.labConfig, logger: this.deps.logger }, item.message)
+            processWebhook(sp, {
+              workspaceId,
+              config: this.deps.config,
+              labConfig: this.deps.labConfig,
+              logger: this.deps.logger,
+            }, item.message)
           );
           tasks.push(...found);
           await tx`select private.telar_ack(${item.msg_id}::bigint)`;

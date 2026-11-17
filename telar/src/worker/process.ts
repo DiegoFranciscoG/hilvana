@@ -32,11 +32,19 @@ export interface ProcessDeps {
   logger: Logger;
 }
 
-export function eventsOf(message: QueuedWebhook, shopCurrency = 'USD'): { channel: ChannelType; events: InboundEvent[] } {
+export function eventsOf(
+  message: QueuedWebhook,
+  shopCurrency = 'USD',
+): { channel: ChannelType; events: InboundEvent[] } {
   if (message.provider === 'shopify') {
     return {
       channel: 'shopify',
-      events: parseShopifyWebhook(message.meta.topic ?? 'unknown', message.meta.shop ?? '', message.payload, shopCurrency),
+      events: parseShopifyWebhook(
+        message.meta.topic ?? 'unknown',
+        message.meta.shop ?? '',
+        message.payload,
+        shopCurrency,
+      ),
     };
   }
   if (isWhatsAppPayload(message.payload)) return { channel: 'whatsapp', events: parseWhatsAppWebhook(message.payload) };
@@ -50,12 +58,24 @@ function preview(event: InboundEvent): string {
   return `[${event.message?.kind ?? 'mensaje'}]`;
 }
 
-async function resolveChannel(tx: Tx, type: ChannelType, externalId: string, credentialId: string): Promise<string | null> {
-  const [row] = await tx<{ id: string | null }[]>`select private.telar_resolve_channel(${type}, ${externalId}, ${credentialId}::uuid) as id`;
+async function resolveChannel(
+  tx: Tx,
+  type: ChannelType,
+  externalId: string,
+  credentialId: string,
+): Promise<string | null> {
+  const [row] = await tx<
+    { id: string | null }[]
+  >`select private.telar_resolve_channel(${type}, ${externalId}, ${credentialId}::uuid) as id`;
   return row?.id ?? null;
 }
 
-async function handleMessage(tx: Tx, deps: ProcessDeps, event: InboundEvent, credentialId: string): Promise<ReplyTask | null> {
+async function handleMessage(
+  tx: Tx,
+  deps: ProcessDeps,
+  event: InboundEvent,
+  credentialId: string,
+): Promise<ReplyTask | null> {
   if (!event.contact || !event.message) return null;
   const channelId = await resolveChannel(tx, event.channel, event.externalChannelId, credentialId);
   if (!channelId) {
@@ -65,7 +85,9 @@ async function handleMessage(tx: Tx, deps: ProcessDeps, event: InboundEvent, cre
   const occurredAt = new Date(event.occurredAt);
   const [contact] = await tx<{ id: string }[]>`
     insert into public.contact (workspace_id, channel_id, external_id, display_name, last_inbound_at)
-    values (${deps.workspaceId}, ${channelId}, ${event.contact.externalId}, ${event.contact.displayName?.slice(0, 120) ?? null}, ${occurredAt})
+    values (${deps.workspaceId}, ${channelId}, ${event.contact.externalId}, ${
+    event.contact.displayName?.slice(0, 120) ?? null
+  }, ${occurredAt})
     on conflict (channel_id, external_id) do update set
       display_name = coalesce(excluded.display_name, contact.display_name),
       last_inbound_at = greatest(contact.last_inbound_at, excluded.last_inbound_at)
@@ -83,7 +105,9 @@ async function handleMessage(tx: Tx, deps: ProcessDeps, event: InboundEvent, cre
       (workspace_id, conversation_id, channel_id, direction, author, channel_message_id, kind, body, payload, status, created_at)
     values (${deps.workspaceId}, ${conversation.id}, ${channelId}, 'inbound', 'contact', ${event.message.externalId},
             ${event.message.kind}, ${event.message.text?.slice(0, 4096) ?? null},
-            ${tx.json({ mediaId: event.message.mediaId ?? null, replyTo: event.message.replyTo ?? null })}, 'received', ${occurredAt})
+            ${
+    tx.json({ mediaId: event.message.mediaId ?? null, replyTo: event.message.replyTo ?? null })
+  }, 'received', ${occurredAt})
     on conflict (channel_id, channel_message_id) where channel_message_id is not null do nothing
     returning id`;
 
@@ -161,7 +185,8 @@ async function handleCompliance(tx: Tx, deps: ProcessDeps, event: InboundEvent, 
   const ids = event.compliance.customerExternalIds;
   let affected = 0;
   if (event.compliance.topic === 'customers/redact' && channelId && ids.length) {
-    const deleted = await tx`delete from public.contact where channel_id = ${channelId} and external_id = any(${ids}) returning id`;
+    const deleted =
+      await tx`delete from public.contact where channel_id = ${channelId} and external_id = any(${ids}) returning id`;
     affected = deleted.length;
   }
   if (event.compliance.topic === 'shop/redact') {

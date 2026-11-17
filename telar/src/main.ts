@@ -13,7 +13,12 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 }
 
 const server = Deno.serve(
-  { port: runtime.config.port, hostname: '0.0.0.0', signal: controller.signal, onListen: () => runtime.logger.info('telar_listening', { port: runtime.config.port }) },
+  {
+    port: runtime.config.port,
+    hostname: '0.0.0.0',
+    signal: controller.signal,
+    onListen: () => runtime.logger.info('telar_listening', { port: runtime.config.port }),
+  },
   runtime.app.fetch,
 );
 await server.finished;

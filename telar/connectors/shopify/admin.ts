@@ -103,7 +103,9 @@ export class ShopifyAdmin {
           const price = Number(variant.price);
           out.push({
             externalRef: `shopify:variant:${variant.id.split('/').pop()}`,
-            title: variant.title && variant.title !== 'Default Title' ? `${product.title} – ${variant.title}` : product.title,
+            title: variant.title && variant.title !== 'Default Title'
+              ? `${product.title} – ${variant.title}`
+              : product.title,
             description: (product.description || product.title).slice(0, 3000),
             price: Number.isFinite(price) ? price : undefined,
             currency: data.shop.currencyCode,

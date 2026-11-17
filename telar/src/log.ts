@@ -25,7 +25,9 @@ export function redact(value: unknown, depth = 0): unknown {
   if (value instanceof Error) return { name: value.name, message: redactText(value.message) };
   if (value && typeof value === 'object') {
     return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, SENSITIVE_KEY.test(k) ? '[redacted]' : redact(v, depth + 1)]),
+      Object.entries(value as Record<string, unknown>).map((
+        [k, v],
+      ) => [k, SENSITIVE_KEY.test(k) ? '[redacted]' : redact(v, depth + 1)]),
     );
   }
   return value;
@@ -44,7 +46,14 @@ export interface Logger {
 export function createLogger(level: LogLevel = 'info', sink: (line: string) => void = (l) => console.log(l)): Logger {
   const emit = (lvl: LogLevel, event: string, fields: Record<string, unknown> = {}) => {
     if (LEVELS[lvl] < LEVELS[level]) return;
-    sink(JSON.stringify({ time: new Date().toISOString(), level: lvl, event, ...(redact(fields) as Record<string, unknown>) }));
+    sink(
+      JSON.stringify({
+        time: new Date().toISOString(),
+        level: lvl,
+        event,
+        ...(redact(fields) as Record<string, unknown>),
+      }),
+    );
   };
   return {
     debug: (e, f) => emit('debug', e, f),

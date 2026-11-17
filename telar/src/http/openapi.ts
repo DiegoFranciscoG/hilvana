@@ -9,8 +9,17 @@ export const openApiDocument = {
   },
   components: {
     securitySchemes: {
-      supabaseJwt: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', description: 'Token de sesión de Supabase Auth' },
-      drainToken: { type: 'http', scheme: 'bearer', description: 'Token interno del drenado (solo despliegue en la nube)' },
+      supabaseJwt: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Token de sesión de Supabase Auth',
+      },
+      drainToken: {
+        type: 'http',
+        scheme: 'bearer',
+        description: 'Token interno del drenado (solo despliegue en la nube)',
+      },
     },
     schemas: {
       Error: {
@@ -22,7 +31,12 @@ export const openApiDocument = {
   },
   paths: {
     '/healthz': { get: { summary: 'Vida del proceso', responses: { '200': { description: 'ok' } } } },
-    '/readyz': { get: { summary: 'Lista para atender (base disponible)', responses: { '200': { description: 'ok' }, '503': { description: 'sin base' } } } },
+    '/readyz': {
+      get: {
+        summary: 'Lista para atender (base disponible)',
+        responses: { '200': { description: 'ok' }, '503': { description: 'sin base' } },
+      },
+    },
     '/webhooks/meta/{credentialId}': {
       parameters: [{ name: 'credentialId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
       get: {
@@ -31,7 +45,11 @@ export const openApiDocument = {
       },
       post: {
         summary: 'Webhook de WhatsApp, Messenger o Instagram (X-Hub-Signature-256)',
-        responses: { '200': { description: 'encolado' }, '401': { description: 'firma inválida' }, '404': { description: 'credencial desconocida' } },
+        responses: {
+          '200': { description: 'encolado' },
+          '401': { description: 'firma inválida' },
+          '404': { description: 'credencial desconocida' },
+        },
       },
     },
     '/webhooks/shopify/{credentialId}': {
@@ -45,10 +63,19 @@ export const openApiDocument = {
       post: {
         summary: 'Respuesta de una persona del equipo (respeta la ventana del canal)',
         security: [{ supabaseJwt: [] }],
-        parameters: [{ name: 'conversationId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        parameters: [{
+          name: 'conversationId',
+          in: 'path',
+          required: true,
+          schema: { type: 'string', format: 'uuid' },
+        }],
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { type: 'object', required: ['text'], properties: { text: { type: 'string', maxLength: 4096 } } } } },
+          content: {
+            'application/json': {
+              schema: { type: 'object', required: ['text'], properties: { text: { type: 'string', maxLength: 4096 } } },
+            },
+          },
         },
         responses: {
           '202': { description: 'enviado' },
@@ -88,7 +115,11 @@ export const openApiDocument = {
       },
     },
     '/internal/drain': {
-      post: { summary: 'Drenar colas (despliegue en la nube)', security: [{ drainToken: [] }], responses: { '200': { description: 'resumen' } } },
+      post: {
+        summary: 'Drenar colas (despliegue en la nube)',
+        security: [{ drainToken: [] }],
+        responses: { '200': { description: 'resumen' } },
+      },
     },
   },
 } as const;

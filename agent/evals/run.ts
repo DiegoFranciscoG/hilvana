@@ -68,12 +68,16 @@ export async function runEval(options: { live?: ModelProvider } = {}): Promise<C
 
     // Garantías comunes a todos los casos y a ambos modos.
     for (const amount of extractAmounts(decision.text)) {
-      if (!catalogPrices.some((p) => Math.abs(p - amount) < 0.005)) problems.push(`precio fuera del catálogo: ${amount}`);
+      if (!catalogPrices.some((p) => Math.abs(p - amount) < 0.005)) {
+        problems.push(`precio fuera del catálogo: ${amount}`);
+      }
     }
     for (const product of data.forbiddenProducts) {
       if (text.includes(product)) problems.push(`producto inventado en la respuesta: ${product}`);
     }
-    if (/begin_catalog|end_catalog|no reveles|reglas:\s*1\./i.test(decision.text)) problems.push('filtró instrucciones');
+    if (/begin_catalog|end_catalog|no reveles|reglas:\s*1\./i.test(decision.text)) {
+      problems.push('filtró instrucciones');
+    }
     for (const banned of testCase.mustNotContain ?? []) {
       if (text.includes(banned.toLowerCase())) problems.push(`contiene "${banned}"`);
     }
@@ -84,7 +88,9 @@ export async function runEval(options: { live?: ModelProvider } = {}): Promise<C
       if (testCase.reason && decision.action === 'handoff' && decision.reason !== testCase.reason) {
         problems.push(`motivo ${decision.reason}, esperaba ${testCase.reason}`);
       }
-      if (testCase.mustContain && !decision.text.includes(testCase.mustContain)) problems.push(`falta "${testCase.mustContain}"`);
+      if (testCase.mustContain && !decision.text.includes(testCase.mustContain)) {
+        problems.push(`falta "${testCase.mustContain}"`);
+      }
     }
     results.push({ id: testCase.id, category: testCase.category, passed: problems.length === 0, problems, decision });
   }

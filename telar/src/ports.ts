@@ -26,9 +26,13 @@ export interface HumanReplyResult {
 export interface ApiPort {
   memberRole(workspaceId: string, userId: string): Promise<'owner' | 'agent' | 'viewer' | null>;
   conversationWorkspace(conversationId: string): Promise<string | null>;
-  sendHumanReply(input: { workspaceId: string; conversationId: string; userId: string; text: string }): Promise<HumanReplyResult>;
+  sendHumanReply(
+    input: { workspaceId: string; conversationId: string; userId: string; text: string },
+  ): Promise<HumanReplyResult>;
   deleteAccount(userId: string): Promise<Record<string, unknown>>;
-  previewAgent(input: { workspaceId: string; spec?: unknown; message: string }): Promise<{ action: string; text: string; flags: string[] }>;
+  previewAgent(
+    input: { workspaceId: string; spec?: unknown; message: string },
+  ): Promise<{ action: string; text: string; flags: string[] }>;
   syncShopifyCatalog(workspaceId: string): Promise<{ upserted: number }>;
 }
 

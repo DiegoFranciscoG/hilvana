@@ -22,11 +22,20 @@ function harness() {
         id === META_CRED
           ? { workspaceId: WORKSPACE, provider: 'meta', status: 'active', publicConfig: {} }
           : id === SHOP_CRED
-          ? { workspaceId: WORKSPACE, provider: 'shopify', status: 'active', publicConfig: { shopDomain: 'demo.myshopify.com' } }
+          ? {
+            workspaceId: WORKSPACE,
+            provider: 'shopify',
+            status: 'active',
+            publicConfig: { shopDomain: 'demo.myshopify.com' },
+          }
           : null,
       ),
     credentialSecret: (_ws, id) => {
-      const meta: Record<string, string> = { appSecret: 'app-secret-de-prueba', accessToken: 'EAAtoken', verifyToken: 'verificar-123' };
+      const meta: Record<string, string> = {
+        appSecret: 'app-secret-de-prueba',
+        accessToken: 'EAAtoken',
+        verifyToken: 'verificar-123',
+      };
       const shopify: Record<string, string> = { clientSecret: 'shopify-secret-de-prueba', accessToken: 'shpat_x' };
       return Promise.resolve(id === META_CRED ? meta : shopify);
     },
@@ -47,7 +56,9 @@ function harness() {
     conversationWorkspace: (id) => Promise.resolve(id === CONVERSATION ? WORKSPACE : null),
     sendHumanReply: ({ text }) => {
       sent.push(text);
-      return Promise.resolve(text.includes('tarde') ? { status: 'blocked', reason: 'window_closed' } : { status: 'sent', messageId: 'm1' });
+      return Promise.resolve(
+        text.includes('tarde') ? { status: 'blocked', reason: 'window_closed' } : { status: 'sent', messageId: 'm1' },
+      );
     },
     deleteAccount: () => Promise.resolve({ deletedWorkspaces: 1 }),
     previewAgent: () => Promise.resolve({ action: 'reply', text: 'hola', flags: [] }),
@@ -90,7 +101,9 @@ Deno.test('T-01 webhook de Meta con firma inválida: 401 y nada en la cola', asy
   const { app, queued, logs } = harness();
   const body = await fixture('whatsapp/text.json');
   const forged = await signMetaBody(new TextEncoder().encode(body), 'otro-secreto');
-  const attempts: Record<string, string>[] = [{ 'X-Hub-Signature-256': forged }, {}, { 'X-Hub-Signature-256': 'sha256=00' }];
+  const attempts: Record<string, string>[] = [{ 'X-Hub-Signature-256': forged }, {}, {
+    'X-Hub-Signature-256': 'sha256=00',
+  }];
   for (const headers of attempts) {
     const response = await app.request(`/webhooks/meta/${META_CRED}`, { method: 'POST', headers, body });
     assertEquals(response.status, 401);
@@ -103,19 +116,40 @@ Deno.test('T-01 webhook de Meta con firma inválida: 401 y nada en la cola', asy
 Deno.test('webhook de Meta: credencial desconocida, cuerpo enorme y JSON inválido', async () => {
   const { app } = harness();
   assertEquals((await app.request('/webhooks/meta/no-es-uuid', { method: 'POST', body: '{}' })).status, 404);
-  assertEquals((await app.request(`/webhooks/meta/${crypto.randomUUID()}`, { method: 'POST', body: '{}' })).status, 404);
+  assertEquals(
+    (await app.request(`/webhooks/meta/${crypto.randomUUID()}`, { method: 'POST', body: '{}' })).status,
+    404,
+  );
   const big = 'x'.repeat(70_000);
-  assertEquals((await app.request(`/webhooks/meta/${META_CRED}`, { method: 'POST', body: big, headers: { 'Content-Length': String(big.length) } })).status, 413);
+  assertEquals(
+    (await app.request(`/webhooks/meta/${META_CRED}`, {
+      method: 'POST',
+      body: big,
+      headers: { 'Content-Length': String(big.length) },
+    })).status,
+    413,
+  );
   const bad = 'no es json';
   const sig = await signMetaBody(new TextEncoder().encode(bad), 'app-secret-de-prueba');
-  assertEquals((await app.request(`/webhooks/meta/${META_CRED}`, { method: 'POST', body: bad, headers: { 'X-Hub-Signature-256': sig } })).status, 400);
+  assertEquals(
+    (await app.request(`/webhooks/meta/${META_CRED}`, {
+      method: 'POST',
+      body: bad,
+      headers: { 'X-Hub-Signature-256': sig },
+    })).status,
+    400,
+  );
 });
 
 Deno.test('verificación GET de Meta devuelve el challenge solo con el token del espacio', async () => {
   const { app } = harness();
-  const ok = await app.request(`/webhooks/meta/${META_CRED}?hub.mode=subscribe&hub.verify_token=verificar-123&hub.challenge=987654`);
+  const ok = await app.request(
+    `/webhooks/meta/${META_CRED}?hub.mode=subscribe&hub.verify_token=verificar-123&hub.challenge=987654`,
+  );
   assertEquals([ok.status, await ok.text()], [200, '987654']);
-  const wrong = await app.request(`/webhooks/meta/${META_CRED}?hub.mode=subscribe&hub.verify_token=otro&hub.challenge=987654`);
+  const wrong = await app.request(
+    `/webhooks/meta/${META_CRED}?hub.mode=subscribe&hub.verify_token=otro&hub.challenge=987654`,
+  );
   assertEquals(wrong.status, 403);
 });
 
@@ -147,9 +181,17 @@ Deno.test('API: sin token 401; con rol de agente responde; ventana cerrada 409; 
   const url = `/api/conversations/${CONVERSATION}/messages`;
   assertEquals((await app.request(url, { method: 'POST', body: JSON.stringify({ text: 'hola' }) })).status, 401);
   const auth = { Authorization: 'Bearer token-valido', 'Content-Type': 'application/json' };
-  const ok = await app.request(url, { method: 'POST', headers: auth, body: JSON.stringify({ text: 'Hola, te ayudo' }) });
+  const ok = await app.request(url, {
+    method: 'POST',
+    headers: auth,
+    body: JSON.stringify({ text: 'Hola, te ayudo' }),
+  });
   assertEquals(ok.status, 202);
-  const late = await app.request(url, { method: 'POST', headers: auth, body: JSON.stringify({ text: 'respuesta tarde' }) });
+  const late = await app.request(url, {
+    method: 'POST',
+    headers: auth,
+    body: JSON.stringify({ text: 'respuesta tarde' }),
+  });
   assertEquals(late.status, 409);
   const other = await app.request(`/api/conversations/${crypto.randomUUID()}/messages`, {
     method: 'POST',
@@ -202,6 +244,10 @@ Deno.test('configurador por API: arranca y avanza sin sesión de servidor', asyn
     body: JSON.stringify({ state: first.state, text: 'Panadería La Espiga' }),
   })).json();
   assertEquals(second.state.step, 1);
-  const invalid = await app.request('/api/configurator/answer', { method: 'POST', headers, body: JSON.stringify({ state: { step: 99 }, text: 'x' }) });
+  const invalid = await app.request('/api/configurator/answer', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ state: { step: 99 }, text: 'x' }),
+  });
   assertEquals(invalid.status, 400);
 });

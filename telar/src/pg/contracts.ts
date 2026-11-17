@@ -4,7 +4,15 @@ import type { ContractStore, DriftAlert, StoredContract } from '../../../lab/src
 import type { JsonSchema } from '../../../lab/src/schema.ts';
 import type { Tx } from '../db.ts';
 
-type Row = { id: string; channel_type: ChannelType; event_key: string; version: number; schema: JsonSchema; schema_hash: string; sample_count: number };
+type Row = {
+  id: string;
+  channel_type: ChannelType;
+  event_key: string;
+  version: number;
+  schema: JsonSchema;
+  schema_hash: string;
+  sample_count: number;
+};
 
 const toContract = (r: Row): StoredContract => ({
   id: r.id,
@@ -41,7 +49,8 @@ export class PgContractStore implements ContractStore {
   }
 
   async addSample(contractId: string, payload: unknown, payloadHash: string, maxSamples: number): Promise<boolean> {
-    await this.tx`update public.contract set sample_count = sample_count + 1, last_seen_at = now() where id = ${contractId}`;
+    await this
+      .tx`update public.contract set sample_count = sample_count + 1, last_seen_at = now() where id = ${contractId}`;
     const [{ count }] = await this.tx<{ count: number }[]>`
       select count(*)::int as count from public.contract_sample where contract_id = ${contractId}`;
     if (count >= maxSamples) return false;

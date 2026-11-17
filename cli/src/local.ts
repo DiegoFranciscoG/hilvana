@@ -13,13 +13,28 @@ export function psqlLiteral(value: string): string {
 }
 
 export async function sqlJson<T>(run: Runner, sql: string, variables: Record<string, string> = {}): Promise<T> {
-  const args = [...COMPOSE, 'exec', '-T', 'db', 'psql', '-U', 'postgres', '-d', 'postgres', '-At', '-v', 'ON_ERROR_STOP=1'];
+  const args = [
+    ...COMPOSE,
+    'exec',
+    '-T',
+    'db',
+    'psql',
+    '-U',
+    'postgres',
+    '-d',
+    'postgres',
+    '-At',
+    '-v',
+    'ON_ERROR_STOP=1',
+  ];
   // Las variables (incluidos secretos) viajan por stdin con \set: nunca en la lista de procesos.
   const sets = Object.entries(variables).map(([name, value]) => {
     if (!/^[a-z_]+$/.test(name)) throw new Error('invalid variable name');
     return `\\set ${name} ${psqlLiteral(value)}`;
   });
-  const result = await run(args, { stdin: [...sets, `select coalesce(json_agg(t), '[]'::json) from (${sql}) t;`].join('\n') });
+  const result = await run(args, {
+    stdin: [...sets, `select coalesce(json_agg(t), '[]'::json) from (${sql}) t;`].join('\n'),
+  });
   if (result.code !== 0) throw new Error(result.stderr.trim().split('\n').pop() ?? 'psql failed');
   return JSON.parse(result.stdout.trim() || '[]') as T;
 }
@@ -65,7 +80,10 @@ export function listContracts(run: Runner, slug?: string): Promise<ContractRow[]
   );
 }
 
-export function contractAlerts(run: Runner, slug?: string): Promise<{ slug: string; event_key: string; summary: string; created_at: string }[]> {
+export function contractAlerts(
+  run: Runner,
+  slug?: string,
+): Promise<{ slug: string; event_key: string; summary: string; created_at: string }[]> {
   return sqlJson(
     run,
     `select w.slug, a.event_key, a.summary, a.created_at
@@ -76,7 +94,10 @@ export function contractAlerts(run: Runner, slug?: string): Promise<{ slug: stri
   );
 }
 
-export function createWorkspace(run: Runner, input: { name: string; slug: string; country: string; plan: string }): Promise<{ id: string }[]> {
+export function createWorkspace(
+  run: Runner,
+  input: { name: string; slug: string; country: string; plan: string },
+): Promise<{ id: string }[]> {
   return sqlJson(
     run,
     `insert into public.workspace (name, slug, country_code, plan_code)
@@ -93,7 +114,13 @@ export function storeCredential(
     run,
     `select private.store_credential_admin(w.id, :'provider', :'label', (:'secret')::jsonb, (:'public_config')::jsonb) as id
      from public.workspace w where w.slug = :'slug'`,
-    { slug: input.slug, provider: input.provider, label: input.label, secret: input.secret, public_config: input.publicConfig },
+    {
+      slug: input.slug,
+      provider: input.provider,
+      label: input.label,
+      secret: input.secret,
+      public_config: input.publicConfig,
+    },
   );
 }
 
@@ -106,7 +133,13 @@ export function addChannel(
     `insert into public.channel (workspace_id, credential_id, type, external_id, display_name)
      select w.id, (:'credential_id')::uuid, :'type', :'external_id', :'display_name'
      from public.workspace w where w.slug = :'slug' returning id`,
-    { slug: input.slug, credential_id: input.credentialId, type: input.type, external_id: input.externalId, display_name: input.displayName },
+    {
+      slug: input.slug,
+      credential_id: input.credentialId,
+      type: input.type,
+      external_id: input.externalId,
+      display_name: input.displayName,
+    },
   );
 }
 

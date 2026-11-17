@@ -34,7 +34,9 @@ export class PgApi implements ApiPort {
     return row?.id ?? null;
   }
 
-  sendHumanReply(input: { workspaceId: string; conversationId: string; userId: string; text: string }): Promise<HumanReplyResult> {
+  sendHumanReply(
+    input: { workspaceId: string; conversationId: string; userId: string; text: string },
+  ): Promise<HumanReplyResult> {
     return this.deps.replier.humanReply(input);
   }
 
@@ -46,7 +48,9 @@ export class PgApi implements ApiPort {
     const id = assertUuid(userId);
     const key = this.deps.config.supabaseSecretKey;
     if (!key) throw new Error('SUPABASE_SECRET_KEY is required for account deletion');
-    const [row] = await this.sql<{ summary: Record<string, unknown> }[]>`select private.delete_account_data(${id}::uuid) as summary`;
+    const [row] = await this.sql<
+      { summary: Record<string, unknown> }[]
+    >`select private.delete_account_data(${id}::uuid) as summary`;
     const response = await (this.deps.fetch ?? fetch)(`${this.deps.config.supabaseUrl}/auth/v1/admin/users/${id}`, {
       method: 'DELETE',
       headers: { apikey: key, Authorization: `Bearer ${key}` },
@@ -57,14 +61,18 @@ export class PgApi implements ApiPort {
     return row.summary;
   }
 
-  async previewAgent(input: { workspaceId: string; spec?: unknown; message: string }): Promise<{ action: string; text: string; flags: string[] }> {
+  async previewAgent(
+    input: { workspaceId: string; spec?: unknown; message: string },
+  ): Promise<{ action: string; text: string; flags: string[] }> {
     const stored = await withWorkspace(this.sql, input.workspaceId, async (tx) => {
       const [row] = await tx<{ spec: unknown }[]>`
         select s.spec from public.workspace w join public.agent_spec s on s.id = w.active_agent_spec_id`;
       const [ai] = await tx<{ credential_id: string; public_config: Record<string, unknown> }[]>`
         select credential_id, public_config from private.telar_ai_credential()`;
       const key = ai
-        ? (await tx<{ secret: Record<string, string> }[]>`select private.telar_credential_secret(${ai.credential_id}::uuid) as secret`)[0].secret.apiKey
+        ? (await tx<
+          { secret: Record<string, string> }[]
+        >`select private.telar_credential_secret(${ai.credential_id}::uuid) as secret`)[0].secret.apiKey
         : null;
       return { spec: row?.spec, ai: ai?.public_config ?? null, key };
     });

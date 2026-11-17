@@ -15,7 +15,12 @@
                 "id": "wamid.HBgMNTkzOTg3NjU0MzIxFQIAEhgUQUJDREVGMDEyMzQ1Njc4OUFCQwA=",
                 "timestamp": "1794830460",
                 "type": "image",
-                "image": { "caption": "Así quiero la torta, a nombre de Mateo", "mime_type": "image/jpeg", "sha256": "c2FtcGxlLWhhc2g=", "id": "1234567890123456" }
+                "image": {
+                  "caption": "Así quiero la torta, a nombre de Mateo",
+                  "mime_type": "image/jpeg",
+                  "sha256": "c2FtcGxlLWhhc2g=",
+                  "id": "1234567890123456"
+                }
               }
             ]
           },

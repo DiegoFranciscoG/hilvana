@@ -62,7 +62,10 @@ function toTime(hour: string, minute: string | undefined): string | null {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-export function parseHours(text: string, config: ConfiguratorConfig): { day: Day; open: string; close: string }[] | null {
+export function parseHours(
+  text: string,
+  config: ConfiguratorConfig,
+): { day: Day; open: string; close: string }[] | null {
   const slots: { day: Day; open: string; close: string }[] = [];
   // "lunes a viernes 9-18 y sábado 9-13" son dos tramos; "sábado y domingo 10-14" es uno solo.
   const rawSegments = text.split(/[,;\n]/).flatMap((part) => {
@@ -96,7 +99,11 @@ export function parseHours(text: string, config: ConfiguratorConfig): { day: Day
   return slots.length ? slots : null;
 }
 
-function parseAnswer(question: Question, text: string, config: ConfiguratorConfig): { ok: true; value: unknown } | { ok: false; error: string } | { ok: true; skip: true } {
+function parseAnswer(
+  question: Question,
+  text: string,
+  config: ConfiguratorConfig,
+): { ok: true; value: unknown } | { ok: false; error: string } | { ok: true; skip: true } {
   const trimmed = text.trim();
   const normalized = normalizeText(trimmed);
   if (question.skipWords?.some((w) => normalizeText(w) === normalized)) return { ok: true, skip: true };
@@ -104,12 +111,16 @@ function parseAnswer(question: Question, text: string, config: ConfiguratorConfi
     case 'text': {
       const min = question.min ?? 1;
       const max = question.max ?? 200;
-      if (trimmed.length < min || trimmed.length > max) return { ok: false, error: `Escribe entre ${min} y ${max} caracteres.` };
+      if (trimmed.length < min || trimmed.length > max) {
+        return { ok: false, error: `Escribe entre ${min} y ${max} caracteres.` };
+      }
       return { ok: true, value: trimmed };
     }
     case 'country': {
       const code = config.countries[normalized] ?? config.countries[trimmed.toLowerCase()];
-      return code ? { ok: true, value: code } : { ok: false, error: 'No reconocí el país. Prueba con su nombre, por ejemplo "Ecuador" o "Perú".' };
+      return code
+        ? { ok: true, value: code }
+        : { ok: false, error: 'No reconocí el país. Prueba con su nombre, por ejemplo "Ecuador" o "Perú".' };
     }
     case 'enum': {
       for (const [value, synonyms] of Object.entries(question.options ?? {})) {
@@ -119,7 +130,9 @@ function parseAnswer(question: Question, text: string, config: ConfiguratorConfi
     }
     case 'hours': {
       const slots = parseHours(trimmed, config);
-      return slots ? { ok: true, value: slots } : { ok: false, error: 'No entendí el horario. Ejemplo: lunes a viernes 08:00-18:00.' };
+      return slots
+        ? { ok: true, value: slots }
+        : { ok: false, error: 'No entendí el horario. Ejemplo: lunes a viernes 08:00-18:00.' };
     }
     case 'policy': {
       if (config.no.some((n) => normalizeText(n) === normalized)) return { ok: true, skip: true };
@@ -150,7 +163,10 @@ function setPath(target: Record<string, unknown>, path: string, value: unknown):
   else node[last] = value;
 }
 
-export function buildSpec(config: ConfiguratorConfig, answers: Record<string, unknown>): ReturnType<typeof validateSpec> {
+export function buildSpec(
+  config: ConfiguratorConfig,
+  answers: Record<string, unknown>,
+): ReturnType<typeof validateSpec> {
   const spec = structuredClone(config.defaults) as Record<string, unknown>;
   for (const question of config.questions) {
     if (question.id in answers) setPath(spec, question.field, answers[question.id]);
@@ -176,5 +192,7 @@ export function answerInterview(config: ConfiguratorConfig, state: InterviewStat
     return { done: false, state: next, prompt: template(config.questions[next.step].ask, answers) };
   }
   const result = buildSpec(config, answers);
-  return result.ok ? { done: true, state: next, spec: result.spec } : { done: true, state: next, issues: result.issues };
+  return result.ok
+    ? { done: true, state: next, spec: result.spec }
+    : { done: true, state: next, issues: result.issues };
 }

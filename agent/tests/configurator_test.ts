@@ -1,5 +1,11 @@
 import { assert, assertEquals } from '@std/assert';
-import { answerInterview, type InterviewTurn, loadConfiguratorConfig, parseHours, startInterview } from '@hilvana/agent/configurator.ts';
+import {
+  answerInterview,
+  type InterviewTurn,
+  loadConfiguratorConfig,
+  parseHours,
+  startInterview,
+} from '@hilvana/agent/configurator.ts';
 import { specJsonSchema, validateSpec } from '@hilvana/agent/spec.ts';
 
 const config = await loadConfiguratorConfig();
@@ -62,8 +68,18 @@ Deno.test('T-05 respuestas inválidas repiten la pregunta con una ayuda, sin ava
 
 Deno.test('T-05 una entrevista de Perú usa soles y la zona horaria de Lima', () => {
   const { last } = interview([
-    'Ferretería del Sur', 'ferretería', 'Perú', 'Ferre', 'formal', 'lun-vie 8 a 18', 'no', 'Yape y efectivo',
-    'shopify', 'no', 'listo', 'no',
+    'Ferretería del Sur',
+    'ferretería',
+    'Perú',
+    'Ferre',
+    'formal',
+    'lun-vie 8 a 18',
+    'no',
+    'Yape y efectivo',
+    'shopify',
+    'no',
+    'listo',
+    'no',
   ]);
   assert(last.done && 'spec' in last);
   assertEquals([last.spec.business.currency, last.spec.business.timezone], ['PEN', 'America/Lima']);
@@ -83,8 +99,18 @@ Deno.test('horarios: rangos, días sueltos y todos los días', () => {
 
 Deno.test('la especificación rechaza un asistente que no se identifica como automático', () => {
   const { last } = interview([
-    'Panadería La Espiga', 'panadería', 'Ecuador', 'listo', 'cercano', 'lunes 08:00-12:00', 'no', 'efectivo', 'manual',
-    'sí', 'listo', 'sí',
+    'Panadería La Espiga',
+    'panadería',
+    'Ecuador',
+    'listo',
+    'cercano',
+    'lunes 08:00-12:00',
+    'no',
+    'efectivo',
+    'manual',
+    'sí',
+    'listo',
+    'sí',
   ]);
   assert(last.done && 'spec' in last);
   const hidden = { ...last.spec, assistant: { ...last.spec.assistant, disclosure: 'Hola, soy Ana de la panadería.' } };

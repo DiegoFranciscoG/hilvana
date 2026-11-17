@@ -2,7 +2,15 @@
 import { embed, type KnowledgeItem, LOCAL_EMBEDDING_MODEL, type Retriever } from '../../../agent/src/knowledge.ts';
 import { type Sql, type Tx, vectorLiteral, withWorkspace } from '../db.ts';
 
-type Row = { id: string; source: KnowledgeItem['source']; title: string; content: string; price: string | null; currency: string | null; stock: number | null };
+type Row = {
+  id: string;
+  source: KnowledgeItem['source'];
+  title: string;
+  content: string;
+  price: string | null;
+  currency: string | null;
+  stock: number | null;
+};
 
 function toItem(row: Row): KnowledgeItem {
   return { ...row, price: row.price === null ? null : Number(row.price) };
@@ -53,7 +61,9 @@ export async function upsertChunk(tx: Tx, workspaceId: string, chunk: ChunkInput
   await tx`
     insert into public.knowledge_chunk
       (workspace_id, source, external_ref, title, content, price, currency, stock, embedding, embedding_model)
-    values (${workspaceId}, ${chunk.source}, ${chunk.externalRef}, ${chunk.title.slice(0, 200)}, ${chunk.content.slice(0, 4000)},
+    values (${workspaceId}, ${chunk.source}, ${chunk.externalRef}, ${chunk.title.slice(0, 200)}, ${
+    chunk.content.slice(0, 4000)
+  },
             ${hasPrice ? chunk.price! : null}, ${hasPrice ? chunk.currency! : null}, ${chunk.stock ?? null},
             ${vector}::extensions.vector, ${LOCAL_EMBEDDING_MODEL})
     on conflict (workspace_id, source, external_ref) where external_ref is not null do update set

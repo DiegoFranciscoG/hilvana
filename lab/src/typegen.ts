@@ -67,11 +67,29 @@ interface DartClass {
 function dartIdentifier(key: string): string {
   const camel = key.replace(/[^A-Za-z0-9]+(.)?/g, (_, c: string | undefined) => (c ? c.toUpperCase() : ''));
   const safe = /^[0-9]/.test(camel) ? `f${camel}` : camel || 'value';
-  const reserved = ['class', 'default', 'enum', 'in', 'is', 'new', 'null', 'switch', 'this', 'var', 'final', 'void', 'object'];
+  const reserved = [
+    'class',
+    'default',
+    'enum',
+    'in',
+    'is',
+    'new',
+    'null',
+    'switch',
+    'this',
+    'var',
+    'final',
+    'void',
+    'object',
+  ];
   return reserved.includes(safe) ? `${safe}Field` : safe;
 }
 
-function dartFor(schema: JsonSchema, className: string, classes: DartClass[]): { type: string; parse: (expr: string) => string } {
+function dartFor(
+  schema: JsonSchema,
+  className: string,
+  classes: DartClass[],
+): { type: string; parse: (expr: string) => string } {
   const types = typesOf(schema).filter((t) => t !== 'null');
   if (types.length !== 1) return { type: 'Object', parse: (e) => e };
   switch (types[0]) {
@@ -84,7 +102,9 @@ function dartFor(schema: JsonSchema, className: string, classes: DartClass[]): {
     case 'boolean':
       return { type: 'bool', parse: (e) => `${e} as bool` };
     case 'array': {
-      const item = schema.items ? dartFor(schema.items, className + 'Item', classes) : { type: 'Object', parse: (e: string) => e };
+      const item = schema.items
+        ? dartFor(schema.items, className + 'Item', classes)
+        : { type: 'Object', parse: (e: string) => e };
       return {
         type: `List<${item.type}>`,
         parse: (e) => `(${e} as List<dynamic>).map((v) => ${item.parse('v')}).toList()`,
@@ -108,7 +128,13 @@ function collectDartClass(schema: JsonSchema, name: string, classes: DartClass[]
     const child = schema.properties![key];
     const resolved = dartFor(child, name + pascal(key), classes);
     const nullable = !required.has(key) || typesOf(child).includes('null');
-    entry.fields.push({ key, name: dartIdentifier(key), type: resolved.type, nullable, parse: resolved.parse(`json['${key}']`) });
+    entry.fields.push({
+      key,
+      name: dartIdentifier(key),
+      type: resolved.type,
+      nullable,
+      parse: resolved.parse(`json['${key}']`),
+    });
   }
 }
 
@@ -117,11 +143,11 @@ export function toDart(eventKey: string, schema: JsonSchema): string {
   collectDartClass(schema, pascal(eventKey), classes);
   const body = classes.map((c) => {
     const fields = c.fields.map((f) => `  final ${f.type}${f.nullable ? '?' : ''} ${f.name};`).join('\n');
-    const ctor = c.fields.length ? `  const ${c.name}({${c.fields.map((f) => `${f.nullable ? '' : 'required '}this.${f.name}`).join(', ')}});` : `  const ${c.name}();`;
+    const ctor = c.fields.length
+      ? `  const ${c.name}({${c.fields.map((f) => `${f.nullable ? '' : 'required '}this.${f.name}`).join(', ')}});`
+      : `  const ${c.name}();`;
     const parse = c.fields.map((f) =>
-      f.nullable
-        ? `      ${f.name}: json['${f.key}'] == null ? null : ${f.parse},`
-        : `      ${f.name}: ${f.parse},`
+      f.nullable ? `      ${f.name}: json['${f.key}'] == null ? null : ${f.parse},` : `      ${f.name}: ${f.parse},`
     ).join('\n');
     return [
       `class ${c.name} {`,

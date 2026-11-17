@@ -75,7 +75,13 @@ function sameProduct(name: string, title: string): boolean {
 
 export function checkOutput(
   output: ModelOutput,
-  context: { retrieved: KnowledgeItem[]; catalogTitles: string[]; systemPrompt: string; maxChars: number; allowPrices: boolean },
+  context: {
+    retrieved: KnowledgeItem[];
+    catalogTitles: string[];
+    systemPrompt: string;
+    maxChars: number;
+    allowPrices: boolean;
+  },
   config: GuardrailConfig,
 ): OutputCheck {
   const violations: string[] = [];
@@ -83,7 +89,9 @@ export function checkOutput(
 
   // Precios: cada monto debe ser exactamente el precio de un ítem recuperado del catálogo; si la
   // respuesta declara productos, el precio tiene que ser de esos productos.
-  const mentioned = context.retrieved.filter((item) => output.mentionedProducts.some((p) => sameProduct(p, item.title)));
+  const mentioned = context.retrieved.filter((item) =>
+    output.mentionedProducts.some((p) => sameProduct(p, item.title))
+  );
   const priced = (output.mentionedProducts.length > 0 ? mentioned : context.retrieved)
     .filter((i) => typeof i.price === 'number');
   const prices = priced.map((i) => i.price as number);
@@ -94,7 +102,9 @@ export function checkOutput(
 
   // Productos: los que el modelo declara mencionar deben existir en el catálogo del negocio.
   for (const product of output.mentionedProducts) {
-    if (!context.catalogTitles.some((title) => sameProduct(product, title))) violations.push(`unknown_product:${product}`);
+    if (!context.catalogTitles.some((title) => sameProduct(product, title))) {
+      violations.push(`unknown_product:${product}`);
+    }
   }
   // Afirmar disponibilidad sin nombrar un producto del catálogo también es inventar.
   const claims = compile(config.availabilityClaims).some((re) => re.test(reply));
@@ -113,7 +123,9 @@ export function checkOutput(
       break;
     }
   }
-  if (/\b(BEGIN|END)_(CATALOG|RULES|SPEC)\b|<\/?(system|catalogo|reglas)>/i.test(reply)) violations.push('internal_marker');
+  if (/\b(BEGIN|END)_(CATALOG|RULES|SPEC)\b|<\/?(system|catalogo|reglas)>/i.test(reply)) {
+    violations.push('internal_marker');
+  }
 
   // Enlaces y marcado: solo hosts permitidos; nada de HTML.
   for (const match of reply.matchAll(/https?:\/\/([^\s/]+)/gi)) {

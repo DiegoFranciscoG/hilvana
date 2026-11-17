@@ -61,7 +61,10 @@ Deno.test('sin presupuesto de IA o con error del proveedor se deriva a una perso
   };
   const noBudget = await respond({ ...base, provider: new CatalogResponder(), tokensLeft: 0 });
   assertEquals(noBudget.action === 'handoff' && noBudget.reason, 'limit_reached');
-  const broken = await respond({ ...base, provider: { name: 'x', complete: () => Promise.reject(new Error('caído')) } });
+  const broken = await respond({
+    ...base,
+    provider: { name: 'x', complete: () => Promise.reject(new Error('caído')) },
+  });
   assertEquals(broken.action === 'handoff' && broken.reason, 'error');
   const invalid = await respond({ ...base, provider: new ScriptedProvider([{ texto: 'sin formato' }]) });
   assertEquals(invalid.action === 'handoff' && invalid.reason, 'error');
@@ -73,7 +76,9 @@ Deno.test('la salida con HTML o demasiado larga no sale', () => {
   const context = { retrieved: [], catalogTitles: [], systemPrompt: 'reglas', maxChars: 50, allowPrices: true };
   assert(!checkOutput({ reply: '<b>hola</b>', intent: 'answer', mentionedProducts: [] }, context, guardrails).ok);
   assert(!checkOutput({ reply: 'x'.repeat(51), intent: 'answer', mentionedProducts: [] }, context, guardrails).ok);
-  assert(checkOutput({ reply: 'Hola, ¿en qué te ayudo?', intent: 'answer', mentionedProducts: [] }, context, guardrails).ok);
+  assert(
+    checkOutput({ reply: 'Hola, ¿en qué te ayudo?', intent: 'answer', mentionedProducts: [] }, context, guardrails).ok,
+  );
 });
 
 Deno.test('proveedor compatible: pide salida estructurada, exige https fuera de local y lee el uso', async () => {
@@ -81,15 +86,23 @@ Deno.test('proveedor compatible: pide salida estructurada, exige https fuera de 
   const provider = new OpenAICompatibleProvider({
     baseUrl: 'http://localhost:11434/v1',
     model: 'modelo-local',
-    fetch: async (_url, init) => {
+    fetch: (_url, init) => {
       body = JSON.parse(String(init?.body));
-      return Response.json({
-        choices: [{ message: { content: JSON.stringify({ reply: 'Hola', intent: 'answer', mentionedProducts: [], leadInterest: null }) } }],
+      return Promise.resolve(Response.json({
+        choices: [{
+          message: {
+            content: JSON.stringify({ reply: 'Hola', intent: 'answer', mentionedProducts: [], leadInterest: null }),
+          },
+        }],
         usage: { prompt_tokens: 50, completion_tokens: 7 },
-      });
+      }));
     },
   });
-  const response = await provider.complete({ system: 's', messages: [{ role: 'user', content: 'u' }], maxOutputTokens: 100 });
+  const response = await provider.complete({
+    system: 's',
+    messages: [{ role: 'user', content: 'u' }],
+    maxOutputTokens: 100,
+  });
   assertEquals((body.response_format as { type: string }).type, 'json_schema');
   assertEquals(response.usage, { inputTokens: 50, outputTokens: 7 });
   let threw = false;

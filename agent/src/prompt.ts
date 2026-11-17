@@ -51,7 +51,9 @@ export function buildSystemPrompt(spec: AgentSpec, retrieved: KnowledgeItem[]): 
     buildRules(spec),
     `Horario: ${describeHours(spec)}.`,
     `Políticas:\n${policies}`,
-    spec.catalog.allowPriceQuotes ? 'Puedes dar precios del catálogo.' : 'No des precios: ofrece pasar con una persona.',
+    spec.catalog.allowPriceQuotes
+      ? 'Puedes dar precios del catálogo.'
+      : 'No des precios: ofrece pasar con una persona.',
     'BEGIN_CATALOG',
     JSON.stringify(catalog),
     'END_CATALOG',

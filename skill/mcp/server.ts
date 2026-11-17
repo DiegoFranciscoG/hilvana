@@ -11,14 +11,17 @@ import { deployPlan, renderPlan, validateDeployOptions } from '../../cli/src/dep
 import { contractAlerts, createWorkspace, listContracts, listWorkspaces } from '../../cli/src/local.ts';
 import { denoRunner, type Runner } from '../../cli/src/runner.ts';
 
-const text = (value: unknown) => ({ content: [{ type: 'text' as const, text: typeof value === 'string' ? value : JSON.stringify(value, null, 2) }] });
+const text = (value: unknown) => ({
+  content: [{ type: 'text' as const, text: typeof value === 'string' ? value : JSON.stringify(value, null, 2) }],
+});
 
 export function createServer(deps: { run: Runner; allowWrite: boolean }): McpServer {
   const server = new McpServer({ name: 'hilvana', version: '0.1.0' });
 
   server.registerTool('list_workspaces', {
     title: 'Espacios de trabajo',
-    description: 'Lista los espacios (negocios) de la instalación local con sus canales. No devuelve secretos ni datos de clientes.',
+    description:
+      'Lista los espacios (negocios) de la instalación local con sus canales. No devuelve secretos ni datos de clientes.',
     inputSchema: z.object({}),
     annotations: { readOnlyHint: true },
   }, async () => {
@@ -47,30 +50,49 @@ export function createServer(deps: { run: Runner; allowWrite: boolean }): McpSer
     annotations: { readOnlyHint: true },
   }, async ({ space }: { space?: string }) => text(await contractAlerts(deps.run, space)));
 
-  server.registerTool('deploy_plan', {
-    title: 'Plan de despliegue en Google Cloud',
-    description: 'Devuelve los comandos de gcloud que ejecutaría `hilvana deploy`. No ejecuta nada.',
-    inputSchema: z.object({
-      project: z.string(),
-      region: z.string(),
-      supabaseUrl: z.string(),
-      dbHost: z.string(),
-      tag: z.string().default('v1'),
-    }),
-    annotations: { readOnlyHint: true },
-  }, ({ project, region, supabaseUrl, dbHost, tag }: { project: string; region: string; supabaseUrl: string; dbHost: string; tag: string }) => {
-    const options = { project, region, supabaseUrl, dbHost, tag };
-    const problems = validateDeployOptions(options);
-    return Promise.resolve(text(problems.length ? `Datos inválidos: ${problems.join('; ')}` : renderPlan(deployPlan(options))));
-  });
+  server.registerTool(
+    'deploy_plan',
+    {
+      title: 'Plan de despliegue en Google Cloud',
+      description: 'Devuelve los comandos de gcloud que ejecutaría `hilvana deploy`. No ejecuta nada.',
+      inputSchema: z.object({
+        project: z.string(),
+        region: z.string(),
+        supabaseUrl: z.string(),
+        dbHost: z.string(),
+        tag: z.string().default('v1'),
+      }),
+      annotations: { readOnlyHint: true },
+    },
+    (
+      { project, region, supabaseUrl, dbHost, tag }: {
+        project: string;
+        region: string;
+        supabaseUrl: string;
+        dbHost: string;
+        tag: string;
+      },
+    ) => {
+      const options = { project, region, supabaseUrl, dbHost, tag };
+      const problems = validateDeployOptions(options);
+      return Promise.resolve(
+        text(problems.length ? `Datos inválidos: ${problems.join('; ')}` : renderPlan(deployPlan(options))),
+      );
+    },
+  );
 
   server.registerTool('connect_instructions', {
     title: 'Cómo conectar un canal',
-    description: 'Explica cómo conectar Meta, Shopify o un proveedor de IA. Los secretos nunca pasan por el chat ni por esta herramienta.',
-    inputSchema: z.object({ provider: z.enum(['meta', 'shopify', 'ai']), space: z.string().regex(/^[a-z0-9-]{3,40}$/) }),
+    description:
+      'Explica cómo conectar Meta, Shopify o un proveedor de IA. Los secretos nunca pasan por el chat ni por esta herramienta.',
+    inputSchema: z.object({
+      provider: z.enum(['meta', 'shopify', 'ai']),
+      space: z.string().regex(/^[a-z0-9-]{3,40}$/),
+    }),
     annotations: { readOnlyHint: true },
   }, ({ provider, space }: { provider: 'meta' | 'shopify' | 'ai'; space: string }) => {
-    const fields = { meta: 'appSecret, accessToken, verifyToken', shopify: 'clientSecret, accessToken', ai: 'apiKey' }[provider];
+    const fields =
+      { meta: 'appSecret, accessToken, verifyToken', shopify: 'clientSecret, accessToken', ai: 'apiKey' }[provider];
     return Promise.resolve(text([
       `Pide a la persona que ejecute en SU terminal (no pegues secretos en el chat):`,
       `  hilvana connect ${provider} --space ${space} --label "<nombre>" < secreto.json`,

@@ -10,7 +10,9 @@ export class PgIngest implements IngestPort {
 
   async resolveCredential(credentialId: string): Promise<ResolvedCredential | null> {
     const id = assertUuid(credentialId, 'credential id');
-    const rows = await this.sql<{ workspace_id: string; provider: string; status: string; public_config: Record<string, unknown> }[]>`
+    const rows = await this.sql<
+      { workspace_id: string; provider: string; status: string; public_config: Record<string, unknown> }[]
+    >`
       select workspace_id, provider, status, public_config from private.telar_resolve_credential(${id}::uuid)`;
     const row = rows[0];
     if (!row) return null;

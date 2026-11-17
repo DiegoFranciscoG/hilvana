@@ -1,5 +1,11 @@
 import { assert, assertEquals, assertFalse, assertRejects, assertThrows } from '@std/assert';
-import { parseShopifyWebhook, ShopifyAdmin, signShopifyBody, stripHtml, verifyShopifyHmac } from '@hilvana/connectors/mod.ts';
+import {
+  parseShopifyWebhook,
+  ShopifyAdmin,
+  signShopifyBody,
+  stripHtml,
+  verifyShopifyHmac,
+} from '@hilvana/connectors/mod.ts';
 
 const encoder = new TextEncoder();
 const fixture = (path: string) => Deno.readTextFile(new URL(`../../../lab/fixtures/${path}`, import.meta.url));
@@ -64,8 +70,18 @@ Deno.test('ShopifyAdmin: pagina el catálogo, usa la cabecera de token y espera 
       assertEquals(new Headers(init?.headers).get('x-shopify-access-token'), 'shpat_prueba');
       call++;
       const page = call === 1
-        ? { hasNextPage: true, endCursor: 'c1', title: 'Pan de yuca', variant: { title: 'Docena', price: '3.50', qty: 40 } }
-        : { hasNextPage: false, endCursor: null, title: 'Empanada', variant: { title: 'Default Title', price: '1.25', qty: null } };
+        ? {
+          hasNextPage: true,
+          endCursor: 'c1',
+          title: 'Pan de yuca',
+          variant: { title: 'Docena', price: '3.50', qty: 40 },
+        }
+        : {
+          hasNextPage: false,
+          endCursor: null,
+          title: 'Empanada',
+          variant: { title: 'Default Title', price: '1.25', qty: null },
+        };
       return Promise.resolve(Response.json({
         data: {
           shop: { currencyCode: 'USD' },
@@ -87,7 +103,12 @@ Deno.test('ShopifyAdmin: pagina el catálogo, usa la cabecera de token y espera 
             }],
           },
         },
-        extensions: { cost: { requestedQueryCost: 52, throttleStatus: { currentlyAvailable: call === 1 ? 2 : 900, restoreRate: 100 } } },
+        extensions: {
+          cost: {
+            requestedQueryCost: 52,
+            throttleStatus: { currentlyAvailable: call === 1 ? 2 : 900, restoreRate: 100 },
+          },
+        },
       }));
     },
   });

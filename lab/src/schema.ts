@@ -50,7 +50,10 @@ export function inferSchema(value: unknown): JsonSchema {
     return { type: 'string', enum: [value] };
   }
   if (Array.isArray(value)) {
-    const items = value.map(inferSchema).reduce<JsonSchema | undefined>((acc, s) => acc ? mergeSchemas(acc, s) : s, undefined);
+    const items = value.map(inferSchema).reduce<JsonSchema | undefined>(
+      (acc, s) => acc ? mergeSchemas(acc, s) : s,
+      undefined,
+    );
     return items ? { type: 'array', items } : { type: 'array' };
   }
   const properties: Record<string, JsonSchema> = {};
@@ -170,10 +173,14 @@ export function diffSchemas(before: JsonSchema, after: JsonSchema, path = ''): S
     changes.push(...diffSchemas(propsBefore[key], propsAfter[key], childPath));
   }
   for (const key of Object.keys(propsBefore).sort()) {
-    if (!(key in propsAfter)) changes.push({ path: path ? `${path}.${key}` : key, kind: 'removed', before: describe(propsBefore[key]) });
+    if (!(key in propsAfter)) {
+      changes.push({ path: path ? `${path}.${key}` : key, kind: 'removed', before: describe(propsBefore[key]) });
+    }
   }
   if (before.items && after.items) changes.push(...diffSchemas(before.items, after.items, `${path}[]`));
-  else if (!before.items && after.items) changes.push({ path: `${path}[]`, kind: 'added', after: describe(after.items) });
+  else if (!before.items && after.items) {
+    changes.push({ path: `${path}[]`, kind: 'added', after: describe(after.items) });
+  }
   return changes;
 }
 

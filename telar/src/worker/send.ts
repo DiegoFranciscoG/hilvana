@@ -12,7 +12,11 @@ export interface SendTarget {
   accessToken: string;
 }
 
-export type Sender = (target: SendTarget, content: OutboundContent, options: { humanAgentTag?: boolean }) => Promise<SendResult>;
+export type Sender = (
+  target: SendTarget,
+  content: OutboundContent,
+  options: { humanAgentTag?: boolean },
+) => Promise<SendResult>;
 
 export function createSender(meta: TelarConfig['meta'], fetchFn: typeof fetch = fetch): Sender {
   return (target, content, options) => {
@@ -23,7 +27,9 @@ export function createSender(meta: TelarConfig['meta'], fetchFn: typeof fetch = 
       accessToken: target.accessToken,
       fetch: fetchFn,
     });
-    if (target.channel === 'whatsapp') return sendWhatsApp(client, target.externalChannelId, target.recipientId, content);
+    if (target.channel === 'whatsapp') {
+      return sendWhatsApp(client, target.externalChannelId, target.recipientId, content);
+    }
     return sendMessaging(client, target.externalChannelId, target.recipientId, content, options);
   };
 }

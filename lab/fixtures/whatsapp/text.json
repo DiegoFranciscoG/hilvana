@@ -15,7 +15,9 @@
                 "id": "wamid.HBgMNTkzOTkxMjM0NTY3FQIAEhgUM0FBQkNERUYwMTIzNDU2Nzg5AA==",
                 "timestamp": "1794830400",
                 "type": "text",
-                "text": { "body": "Hola, soy Lucía Andrade. ¿Cuánto cuesta el pan de yuca? Mi correo es lucia.andrade@correo.test y mi celular 0991234567" }
+                "text": {
+                  "body": "Hola, soy Lucía Andrade. ¿Cuánto cuesta el pan de yuca? Mi correo es lucia.andrade@correo.test y mi celular 0991234567"
+                }
               }
             ]
           },

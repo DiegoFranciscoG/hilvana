@@ -47,8 +47,14 @@ async function types(): Promise<void> {
   await Deno.mkdir(join(SDK, 'dart', 'lib', 'contracts'), { recursive: true });
   for (const contract of latest.values()) {
     const stem = fileStem(contract.eventKey);
-    await Deno.writeTextFile(join(SDK, 'ts', 'contracts', `${stem}.ts`), toTypeScript(contract.eventKey, contract.schema));
-    await Deno.writeTextFile(join(SDK, 'dart', 'lib', 'contracts', `${stem}.dart`), toDart(contract.eventKey, contract.schema));
+    await Deno.writeTextFile(
+      join(SDK, 'ts', 'contracts', `${stem}.ts`),
+      toTypeScript(contract.eventKey, contract.schema),
+    );
+    await Deno.writeTextFile(
+      join(SDK, 'dart', 'lib', 'contracts', `${stem}.dart`),
+      toDart(contract.eventKey, contract.schema),
+    );
     console.log(`tipos   ${contract.eventKey} v${contract.version}`);
   }
 }

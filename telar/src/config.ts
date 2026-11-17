@@ -16,7 +16,11 @@ export interface TelarConfig {
   labCapture: boolean;
   logLevel: 'debug' | 'info' | 'warn' | 'error';
   fcm?: { projectId: string; serviceAccountB64: string };
-  meta: { graphApiVersion: string; hosts: Record<'whatsapp' | 'messenger' | 'instagram', string>; webhookMaxBodyBytes: number };
+  meta: {
+    graphApiVersion: string;
+    hosts: Record<'whatsapp' | 'messenger' | 'instagram', string>;
+    webhookMaxBodyBytes: number;
+  };
   shopify: { apiVersion: string };
   policies: ChannelPolicies;
 }
@@ -46,7 +50,10 @@ export async function loadConfig(env: Env = Deno.env): Promise<TelarConfig> {
 
   const supabaseUrl = required(env, 'SUPABASE_URL').replace(/\/+$/, '');
   const parsedUrl = new URL(supabaseUrl);
-  if (parsedUrl.protocol !== 'https:' && !['localhost', '127.0.0.1', 'kong', 'gateway', 'host.docker.internal'].includes(parsedUrl.hostname)) {
+  if (
+    parsedUrl.protocol !== 'https:' &&
+    !['localhost', '127.0.0.1', 'kong', 'gateway', 'host.docker.internal'].includes(parsedUrl.hostname)
+  ) {
     throw new Error('SUPABASE_URL debe usar https fuera de local');
   }
   const jwtSecret = optional(env, 'SUPABASE_JWT_SECRET');

@@ -45,7 +45,10 @@ interface ConversationContext {
   lastInboundAt: Date | null;
 }
 
-export function defaultProviderFactory(publicConfig: Record<string, unknown> | null, apiKey: string | null): ModelProvider {
+export function defaultProviderFactory(
+  publicConfig: Record<string, unknown> | null,
+  apiKey: string | null,
+): ModelProvider {
   const baseUrl = typeof publicConfig?.baseUrl === 'string' ? publicConfig.baseUrl : null;
   const model = typeof publicConfig?.model === 'string' ? publicConfig.model : null;
   if (!baseUrl || !model) return new CatalogResponder();
@@ -95,7 +98,10 @@ export class Replier {
     return this.deps.now?.() ?? new Date();
   }
 
-  async agentReply(workspaceId: string, task: ReplyTask): Promise<'sent' | 'blocked' | 'handoff' | 'skipped' | 'failed'> {
+  async agentReply(
+    workspaceId: string,
+    task: ReplyTask,
+  ): Promise<'sent' | 'blocked' | 'handoff' | 'skipped' | 'failed'> {
     const { sql, logger } = this.deps;
     const prepared = await withWorkspace(sql, workspaceId, async (tx) => {
       const context = await conversationContext(tx, task.conversationId);
@@ -103,7 +109,9 @@ export class Replier {
       const [spec] = await tx<{ spec: unknown }[]>`
         select s.spec from public.workspace w join public.agent_spec s on s.id = w.active_agent_spec_id`;
       if (!spec) return null; // sin agente publicado, la conversación la atiende el equipo
-      const [inbound] = await tx<{ body: string | null }[]>`select body from public.message where id = ${task.inboundMessageId}`;
+      const [inbound] = await tx<
+        { body: string | null }[]
+      >`select body from public.message where id = ${task.inboundMessageId}`;
       const history = await tx<{ direction: string; body: string | null }[]>`
         select direction, body from public.message
         where conversation_id = ${task.conversationId} and id <> ${task.inboundMessageId} and body is not null
@@ -116,14 +124,19 @@ export class Replier {
       const [ai] = await tx<{ credential_id: string; public_config: Record<string, unknown> }[]>`
         select credential_id, public_config from private.telar_ai_credential()`;
       const aiKey = ai
-        ? (await tx<{ secret: Record<string, string> }[]>`select private.telar_credential_secret(${ai.credential_id}::uuid) as secret`)[0]
+        ? (await tx<
+          { secret: Record<string, string> }[]
+        >`select private.telar_credential_secret(${ai.credential_id}::uuid) as secret`)[0]
           .secret.apiKey
         : null;
       return {
         context,
         spec: spec.spec,
         inbound: inbound?.body ?? '',
-        history: history.reverse().map((h) => ({ role: h.direction === 'inbound' ? 'user' as const : 'assistant' as const, content: h.body! })),
+        history: history.reverse().map((h) => ({
+          role: h.direction === 'inbound' ? 'user' as const : 'assistant' as const,
+          content: h.body!,
+        })),
         agentTurns: counts.agent_turns,
         firstReply: !counts.replied,
         tokensLeft: Number(budget?.tokens_left ?? 0),
@@ -178,7 +191,9 @@ export class Replier {
       if (handoffReason) {
         await tx`update public.conversation set status = 'human' where id = ${task.conversationId}`;
         await tx`insert into public.handoff (workspace_id, conversation_id, reason, detail)
-          values (${workspaceId}, ${task.conversationId}, ${handoffReason}, ${decision.flags.join(',').slice(0, 500) || null})`;
+          values (${workspaceId}, ${task.conversationId}, ${handoffReason}, ${
+          decision.flags.join(',').slice(0, 500) || null
+        })`;
       }
       if (decision.action === 'reply' && decision.leadInterest) {
         await tx`insert into public.lead (workspace_id, conversation_id, contact_id, interest)
@@ -186,24 +201,39 @@ export class Replier {
           from public.conversation c where c.id = ${task.conversationId}`;
       }
       const tokens = handoffReason
-        ? await tx<{ token: string; platform: string }[]>`select token, platform from private.telar_member_device_tokens()`
+        ? await tx<
+          { token: string; platform: string }[]
+        >`select token, platform from private.telar_member_device_tokens()`
         : [];
       const secret = window.allowed ? await accessToken(tx, prepared.context.credentialId) : null;
       return { id: rows[0].id, handoff: Boolean(handoffReason), tokens, secret };
     });
     if (!recorded) return 'skipped';
     if (recorded.handoff && this.deps.notifier && recorded.tokens.length) {
-      await this.deps.notifier.notifyHandoff(workspaceId, recorded.tokens, 'Una conversación necesita a una persona del equipo.')
+      await this.deps.notifier.notifyHandoff(
+        workspaceId,
+        recorded.tokens,
+        'Una conversación necesita a una persona del equipo.',
+      )
         .catch((error) => logger.warn('push_failed', { workspaceId, error }));
     }
     if (!window.allowed || !recorded.secret) return 'blocked';
 
-    const status = await this.#deliver(workspaceId, recorded.id, prepared.context, recorded.secret, decision.text, false);
+    const status = await this.#deliver(
+      workspaceId,
+      recorded.id,
+      prepared.context,
+      recorded.secret,
+      decision.text,
+      false,
+    );
     if (status === 'failed') return 'failed';
     return recorded.handoff ? 'handoff' : 'sent';
   }
 
-  async humanReply(input: { workspaceId: string; conversationId: string; userId: string; text: string }): Promise<HumanReplyResult> {
+  async humanReply(
+    input: { workspaceId: string; conversationId: string; userId: string; text: string },
+  ): Promise<HumanReplyResult> {
     const { sql } = this.deps;
     const now = this.#now();
     const prepared = await withWorkspace(sql, input.workspaceId, async (tx) => {
@@ -253,7 +283,12 @@ export class Replier {
   ): Promise<'sent' | 'failed'> {
     try {
       const result = await this.deps.sender(
-        { channel: context.channelType, externalChannelId: context.externalChannelId, recipientId: context.recipientId, accessToken: token },
+        {
+          channel: context.channelType,
+          externalChannelId: context.externalChannelId,
+          recipientId: context.recipientId,
+          accessToken: token,
+        },
         { kind: 'text', text },
         { humanAgentTag },
       );
@@ -268,7 +303,9 @@ export class Replier {
       this.deps.logger.warn('send_failed', { workspaceId, channel: context.channelType, error });
       await withWorkspace(this.deps.sql, workspaceId, async (tx) => {
         await tx`update public.message set status = 'failed',
-          error = ${tx.json({ message: String((error as Error).message ?? error).slice(0, 300) })} where id = ${messageId}`;
+          error = ${
+          tx.json({ message: String((error as Error).message ?? error).slice(0, 300) })
+        } where id = ${messageId}`;
       });
       return 'failed';
     }

@@ -160,7 +160,9 @@ export async function respond(input: AgentInput): Promise<AgentDecision> {
     text,
     intent: output.intent,
     mentionedProducts: output.mentionedProducts,
-    leadInterest: spec.leads.capture && (output.intent === 'lead' || output.leadInterest) ? output.leadInterest : undefined,
+    leadInterest: spec.leads.capture && (output.intent === 'lead' || output.leadInterest)
+      ? output.leadInterest
+      : undefined,
     usage,
     flags,
   };

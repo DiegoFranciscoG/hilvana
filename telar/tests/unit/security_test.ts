@@ -5,12 +5,21 @@ import { loadConfig } from '@hilvana/telar/config.ts';
 import { RateLimiter } from '@hilvana/telar/http/rate_limit.ts';
 
 const b64url = (data: Uint8Array | string) =>
-  btoa(typeof data === 'string' ? data : String.fromCharCode(...data)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  btoa(typeof data === 'string' ? data : String.fromCharCode(...data)).replace(/\+/g, '-').replace(/\//g, '_').replace(
+    /=+$/,
+    '',
+  );
 
 async function signHs256(payload: Record<string, unknown>, secret: string): Promise<string> {
   const head = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
   const body = b64url(JSON.stringify(payload));
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
   const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${head}.${body}`)));
   return `${head}.${body}.${b64url(sig)}`;
 }
@@ -30,7 +39,16 @@ Deno.test('T-04 los registros censuran secretos por nombre y por forma', () => {
     error: new Error('fallo con sk-proj-ABCDEFGHIJKLMNOPQRSTUV'),
   });
   const out = lines.join('\n');
-  for (const secret of ['EAAJZCvalorSecreto', 'EAAJZCotroSecreto', 'shpat_0123', 'sb_secret_abc', 'sk-proj-ABC', 'abc.def.ghi']) {
+  for (
+    const secret of [
+      'EAAJZCvalorSecreto',
+      'EAAJZCotroSecreto',
+      'shpat_0123',
+      'sb_secret_abc',
+      'sk-proj-ABC',
+      'abc.def.ghi',
+    ]
+  ) {
     assertFalse(out.includes(secret), `se filtró ${secret}`);
   }
   assert(out.includes('[redacted]'));
@@ -40,7 +58,13 @@ Deno.test('T-04 los registros censuran secretos por nombre y por forma', () => {
 Deno.test('JWT HS256 de Supabase: válido, vencido, otro secreto, otro rol', async () => {
   const secret = crypto.randomUUID() + crypto.randomUUID();
   const verifier = new JwtVerifier({ supabaseUrl: 'http://localhost:54321', jwtSecret: secret, now: () => now });
-  const claims = { sub: USER, aud: 'authenticated', role: 'authenticated', exp: now / 1000 + 600, email: 'ana@hilvana.test' };
+  const claims = {
+    sub: USER,
+    aud: 'authenticated',
+    role: 'authenticated',
+    exp: now / 1000 + 600,
+    email: 'ana@hilvana.test',
+  };
   assertEquals((await verifier.verify(await signHs256(claims, secret)))?.userId, USER);
   assertEquals(await verifier.verify(await signHs256({ ...claims, exp: now / 1000 - 600 }, secret)), null);
   assertEquals(await verifier.verify(await signHs256(claims, crypto.randomUUID() + crypto.randomUUID())), null);
@@ -49,7 +73,10 @@ Deno.test('JWT HS256 de Supabase: válido, vencido, otro secreto, otro rol', asy
 });
 
 Deno.test('JWT ES256 con JWKS: verifica con la clave publicada y rechaza otra', async () => {
-  const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']) as CryptoKeyPair;
+  const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, [
+    'sign',
+    'verify',
+  ]) as CryptoKeyPair;
   const jwk = { ...(await crypto.subtle.exportKey('jwk', pair.publicKey)), kid: 'clave-1', alg: 'ES256' };
   let fetches = 0;
   const verifier = new JwtVerifier({
@@ -61,28 +88,55 @@ Deno.test('JWT ES256 con JWKS: verifica con la clave publicada y rechaza otra', 
     },
   });
   const head = b64url(JSON.stringify({ alg: 'ES256', typ: 'JWT', kid: 'clave-1' }));
-  const body = b64url(JSON.stringify({ sub: USER, aud: 'authenticated', role: 'authenticated', exp: now / 1000 + 600 }));
-  const sig = new Uint8Array(await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, pair.privateKey, new TextEncoder().encode(`${head}.${body}`)));
+  const body = b64url(
+    JSON.stringify({ sub: USER, aud: 'authenticated', role: 'authenticated', exp: now / 1000 + 600 }),
+  );
+  const sig = new Uint8Array(
+    await crypto.subtle.sign(
+      { name: 'ECDSA', hash: 'SHA-256' },
+      pair.privateKey,
+      new TextEncoder().encode(`${head}.${body}`),
+    ),
+  );
   assertEquals((await verifier.verify(`${head}.${body}.${b64url(sig)}`))?.userId, USER);
-  const tampered = b64url(JSON.stringify({ sub: USER, aud: 'authenticated', role: 'authenticated', exp: now / 1000 + 99999 }));
+  const tampered = b64url(
+    JSON.stringify({ sub: USER, aud: 'authenticated', role: 'authenticated', exp: now / 1000 + 99999 }),
+  );
   assertEquals(await verifier.verify(`${head}.${tampered}.${b64url(sig)}`), null);
   assertEquals(fetches, 1, 'las claves se cachean');
 });
 
 Deno.test('configuración: sin contraseña de base o con URL insegura no arranca', async () => {
   const env = (values: Record<string, string>) => ({ get: (k: string) => values[k] });
-  await assertRejects(() => loadConfig(env({ TELAR_DB_HOST: 'db', SUPABASE_URL: 'http://localhost:54321' })), Error, 'TELAR_DB_PASSWORD');
   await assertRejects(
-    () => loadConfig(env({ TELAR_DB_HOST: 'db.remota.test', TELAR_DB_PASSWORD: 'x', SUPABASE_URL: 'http://supabase.remota.test' })),
+    () => loadConfig(env({ TELAR_DB_HOST: 'db', SUPABASE_URL: 'http://localhost:54321' })),
+    Error,
+    'TELAR_DB_PASSWORD',
+  );
+  await assertRejects(
+    () =>
+      loadConfig(
+        env({ TELAR_DB_HOST: 'db.remota.test', TELAR_DB_PASSWORD: 'x', SUPABASE_URL: 'http://supabase.remota.test' }),
+      ),
     Error,
     'https',
   );
   await assertRejects(
-    () => loadConfig(env({ TELAR_DB_HOST: 'db', TELAR_DB_PASSWORD: 'x', SUPABASE_URL: 'http://localhost:54321', SUPABASE_JWT_SECRET: 'corto' })),
+    () =>
+      loadConfig(
+        env({
+          TELAR_DB_HOST: 'db',
+          TELAR_DB_PASSWORD: 'x',
+          SUPABASE_URL: 'http://localhost:54321',
+          SUPABASE_JWT_SECRET: 'corto',
+        }),
+      ),
     Error,
     '32',
   );
-  const config = await loadConfig(env({ TELAR_DB_HOST: 'db.remota.test', TELAR_DB_PASSWORD: 'x', SUPABASE_URL: 'https://proyecto.supabase.co' }));
+  const config = await loadConfig(
+    env({ TELAR_DB_HOST: 'db.remota.test', TELAR_DB_PASSWORD: 'x', SUPABASE_URL: 'https://proyecto.supabase.co' }),
+  );
   assertEquals(config.db.ssl, 'require');
   assertEquals(config.meta.graphApiVersion, 'v27.0');
   assertEquals(config.allowedOrigins, []);

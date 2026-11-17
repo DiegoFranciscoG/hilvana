@@ -23,9 +23,28 @@ async function allFixtures(): Promise<{ name: string; payload: unknown }[]> {
 
 // Datos personales sembrados a propósito en los fixtures y en la carga hostil de abajo.
 const PERSONAL_VALUES = [
-  'Lucía', 'Andrade', 'Mateo', 'Cárdenas', 'Andrés', 'Peña', 'Valeria', 'Mora', 'Sofía', 'Ruiz', 'Rodrigo',
-  '593991234567', '593987654321', '0991234567', '998887766', 'lucia.andrade', 'sofia.ruiz', 'valeria.mora',
-  'rodrigo.lema', '7000000000000001', '1234500000000001', '6600000000001',
+  'Lucía',
+  'Andrade',
+  'Mateo',
+  'Cárdenas',
+  'Andrés',
+  'Peña',
+  'Valeria',
+  'Mora',
+  'Sofía',
+  'Ruiz',
+  'Rodrigo',
+  '593991234567',
+  '593987654321',
+  '0991234567',
+  '998887766',
+  'lucia.andrade',
+  'sofia.ruiz',
+  'valeria.mora',
+  'rodrigo.lema',
+  '7000000000000001',
+  '1234500000000001',
+  '6600000000001',
 ];
 
 const hostile = {
@@ -76,7 +95,12 @@ Deno.test('T-08 la captura nunca guarda una muestra con datos personales', async
 Deno.test('T-08 defensa en profundidad: si un patrón sobrevive, la muestra se descarta', async () => {
   const leaky = { ...config, keepValueKeys: [...config.keepValueKeys, 'leak'], keepValuePattern: '.*' };
   await assertRejects(
-    () => captureWebhook(new MemoryContractStore(), leaky, { channel: 'whatsapp', eventKeys: ['x.y'], payload: { leak: 'rodrigo.lema@correo.test' } }),
+    () =>
+      captureWebhook(new MemoryContractStore(), leaky, {
+        channel: 'whatsapp',
+        eventKeys: ['x.y'],
+        payload: { leak: 'rodrigo.lema@correo.test' },
+      }),
     Error,
     'personal data',
   );

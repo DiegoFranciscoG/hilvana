@@ -9,7 +9,10 @@
           "sender": { "id": "7000000000000001" },
           "recipient": { "id": "200000000000001" },
           "timestamp": 1794830400000,
-          "message": { "mid": "m_FAKE-MID-0001", "text": "Buenas, ¿hacen envíos a Cuenca? Escríbanme a sofia.ruiz@correo.test" }
+          "message": {
+            "mid": "m_FAKE-MID-0001",
+            "text": "Buenas, ¿hacen envíos a Cuenca? Escríbanme a sofia.ruiz@correo.test"
+          }
         }
       ]
     }

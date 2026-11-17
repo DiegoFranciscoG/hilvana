@@ -24,7 +24,9 @@ const env = (name: string) => {
   return value;
 };
 
-export const evalData = JSON.parse(await Deno.readTextFile(new URL('../../../agent/evals/conversations.json', import.meta.url)));
+export const evalData = JSON.parse(
+  await Deno.readTextFile(new URL('../../../agent/evals/conversations.json', import.meta.url)),
+);
 
 export function adminSql(): Sql {
   return postgres({
@@ -66,7 +68,11 @@ export async function buildTelar(options: { failSends?: boolean } = {}) {
   const sent: SentRecord[] = [];
   const sender: Sender = (target, content, opts) => {
     if (options.failSends) return Promise.reject(new Error('Graph API 500'));
-    sent.push({ target, text: content.kind === 'text' ? content.text : content.name, humanAgentTag: Boolean(opts.humanAgentTag) });
+    sent.push({
+      target,
+      text: content.kind === 'text' ? content.text : content.name,
+      humanAgentTag: Boolean(opts.humanAgentTag),
+    });
     return Promise.resolve({ externalMessageId: `wamid.salida.${crypto.randomUUID()}` });
   };
   const guardrails = await loadGuardrails();
@@ -106,7 +112,11 @@ export interface TestWorkspace {
 }
 
 /** Crea un espacio con dueño, credencial de Meta, canal de WhatsApp, agente publicado y catálogo. */
-export async function createWorkspace(admin: Sql, telar: Sql, options: { plan?: string; agent?: boolean } = {}): Promise<TestWorkspace> {
+export async function createWorkspace(
+  admin: Sql,
+  telar: Sql,
+  options: { plan?: string; agent?: boolean } = {},
+): Promise<TestWorkspace> {
   const tag = crypto.randomUUID().slice(0, 8);
   const slug = `prueba-${tag}`;
   const appSecret = `app-secret-${crypto.randomUUID()}`;
@@ -117,7 +127,9 @@ export async function createWorkspace(admin: Sql, telar: Sql, options: { plan?: 
             ${`dueno-${tag}@hilvana.test`}, '{}', '{}', now(), now())
     returning id`;
   const [workspace] = await admin<{ id: string }[]>`
-    insert into public.workspace (slug, name, country_code, plan_code) values (${slug}, ${`Negocio ${tag}`}, 'EC', ${options.plan ?? 'starter'})
+    insert into public.workspace (slug, name, country_code, plan_code) values (${slug}, ${`Negocio ${tag}`}, 'EC', ${
+    options.plan ?? 'starter'
+  })
     returning id`;
   await admin`insert into public.member (workspace_id, user_id, role) values (${workspace.id}, ${owner.id}, 'owner')`;
   const [credential] = await admin<{ id: string }[]>`
@@ -146,7 +158,15 @@ export async function createWorkspace(admin: Sql, telar: Sql, options: { plan?: 
       }
     });
   }
-  return { id: workspace.id, slug, ownerId: owner.id, credentialId: credential.id, channelId: channel.id, phoneNumberId, appSecret };
+  return {
+    id: workspace.id,
+    slug,
+    ownerId: owner.id,
+    credentialId: credential.id,
+    channelId: channel.id,
+    phoneNumberId,
+    appSecret,
+  };
 }
 
 export async function dropWorkspace(admin: Sql, ws: TestWorkspace): Promise<void> {
@@ -155,7 +175,11 @@ export async function dropWorkspace(admin: Sql, ws: TestWorkspace): Promise<void
 }
 
 /** Webhook de WhatsApp de texto con datos ficticios. */
-export function whatsappText(ws: TestWorkspace, text: string, options: { from?: string; wamid?: string; secondsAgo?: number } = {}) {
+export function whatsappText(
+  ws: TestWorkspace,
+  text: string,
+  options: { from?: string; wamid?: string; secondsAgo?: number } = {},
+) {
   const timestamp = Math.floor(Date.now() / 1000) - (options.secondsAgo ?? 5);
   return {
     object: 'whatsapp_business_account',
@@ -180,7 +204,12 @@ export function whatsappText(ws: TestWorkspace, text: string, options: { from?: 
   };
 }
 
-export async function postWebhook(app: ReturnType<typeof createApp>, ws: TestWorkspace, payload: unknown, secret = ws.appSecret) {
+export async function postWebhook(
+  app: ReturnType<typeof createApp>,
+  ws: TestWorkspace,
+  payload: unknown,
+  secret = ws.appSecret,
+) {
   const body = JSON.stringify(payload);
   const signature = await signMetaBody(new TextEncoder().encode(body), secret);
   return app.request(`/webhooks/meta/${ws.credentialId}`, {

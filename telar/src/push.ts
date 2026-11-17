@@ -59,7 +59,9 @@ export class FcmNotifier implements Notifier {
       false,
       ['sign'],
     );
-    const signature = new Uint8Array(await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(`${header}.${claims}`)));
+    const signature = new Uint8Array(
+      await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(`${header}.${claims}`)),
+    );
     const response = await this.fetchFn(this.#account.token_uri, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

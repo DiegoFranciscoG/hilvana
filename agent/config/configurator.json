@@ -1,22 +1,107 @@
 {
   "$comment": "Entrevista del configurador: preguntas, opciones y valores por defecto en datos. Los textos se pueden ajustar sin tocar código.",
   "questions": [
-    { "id": "business_name", "ask": "¡Hola! Vamos a preparar el asistente de tu negocio. ¿Cómo se llama tu negocio?", "field": "business.name", "parser": "text", "min": 2, "max": 120 },
-    { "id": "industry", "ask": "¿A qué se dedica? Por ejemplo: panadería, ferretería, óptica.", "field": "business.industry", "parser": "text", "min": 2, "max": 60 },
+    {
+      "id": "business_name",
+      "ask": "¡Hola! Vamos a preparar el asistente de tu negocio. ¿Cómo se llama tu negocio?",
+      "field": "business.name",
+      "parser": "text",
+      "min": 2,
+      "max": 120
+    },
+    {
+      "id": "industry",
+      "ask": "¿A qué se dedica? Por ejemplo: panadería, ferretería, óptica.",
+      "field": "business.industry",
+      "parser": "text",
+      "min": 2,
+      "max": 60
+    },
     { "id": "country", "ask": "¿En qué país atiendes?", "field": "business.country", "parser": "country" },
-    { "id": "assistant_name", "ask": "¿Cómo quieres que se presente tu asistente? Escribe \"listo\" para usar \"Asistente de {business.name}\".", "field": "assistant.displayName", "parser": "text", "min": 2, "max": 80, "skipWords": ["listo", "ok", "dale"] },
-    { "id": "tone", "ask": "¿Qué tono prefieres: cercano, formal o neutral?", "field": "assistant.tone", "parser": "enum", "options": { "cercano": ["cercano", "amigable", "informal", "tú"], "formal": ["formal", "usted", "serio"], "neutral": ["neutral", "normal", "directo"] } },
-    { "id": "hours", "ask": "¿Qué días y horas atiendes? Por ejemplo: lunes a viernes 08:00-18:00, sábado 09:00-13:00.", "field": "hours.weekly", "parser": "hours" },
-    { "id": "delivery", "ask": "¿Haces entregas? Cuéntame cómo funcionan, o escribe \"no\".", "field": "policies", "parser": "policy", "topic": "entregas" },
-    { "id": "payments", "ask": "¿Qué formas de pago aceptas?", "field": "policies", "parser": "policy", "topic": "pagos" },
-    { "id": "catalog", "ask": "¿Tu catálogo está en Shopify o lo cargarás a mano?", "field": "catalog.source", "parser": "enum", "options": { "shopify": ["shopify", "tienda"], "manual": ["mano", "manual", "yo", "excel", "a mano"] } },
-    { "id": "prices", "ask": "¿El asistente puede dar precios del catálogo? (sí/no)", "field": "catalog.allowPriceQuotes", "parser": "yesno" },
-    { "id": "handoff_words", "ask": "¿Con qué palabras te piden hablar con una persona? Sepáralas con comas, o escribe \"listo\" para usar: humano, persona, asesor.", "field": "handoff.keywords", "parser": "list", "skipWords": ["listo", "ok"] },
-    { "id": "leads", "ask": "¿Quieres que el asistente guarde el interés de compra de los clientes para darles seguimiento? (sí/no)", "field": "leads.capture", "parser": "yesno" }
+    {
+      "id": "assistant_name",
+      "ask": "¿Cómo quieres que se presente tu asistente? Escribe \"listo\" para usar \"Asistente de {business.name}\".",
+      "field": "assistant.displayName",
+      "parser": "text",
+      "min": 2,
+      "max": 80,
+      "skipWords": ["listo", "ok", "dale"]
+    },
+    {
+      "id": "tone",
+      "ask": "¿Qué tono prefieres: cercano, formal o neutral?",
+      "field": "assistant.tone",
+      "parser": "enum",
+      "options": {
+        "cercano": ["cercano", "amigable", "informal", "tú"],
+        "formal": ["formal", "usted", "serio"],
+        "neutral": ["neutral", "normal", "directo"]
+      }
+    },
+    {
+      "id": "hours",
+      "ask": "¿Qué días y horas atiendes? Por ejemplo: lunes a viernes 08:00-18:00, sábado 09:00-13:00.",
+      "field": "hours.weekly",
+      "parser": "hours"
+    },
+    {
+      "id": "delivery",
+      "ask": "¿Haces entregas? Cuéntame cómo funcionan, o escribe \"no\".",
+      "field": "policies",
+      "parser": "policy",
+      "topic": "entregas"
+    },
+    {
+      "id": "payments",
+      "ask": "¿Qué formas de pago aceptas?",
+      "field": "policies",
+      "parser": "policy",
+      "topic": "pagos"
+    },
+    {
+      "id": "catalog",
+      "ask": "¿Tu catálogo está en Shopify o lo cargarás a mano?",
+      "field": "catalog.source",
+      "parser": "enum",
+      "options": { "shopify": ["shopify", "tienda"], "manual": ["mano", "manual", "yo", "excel", "a mano"] }
+    },
+    {
+      "id": "prices",
+      "ask": "¿El asistente puede dar precios del catálogo? (sí/no)",
+      "field": "catalog.allowPriceQuotes",
+      "parser": "yesno"
+    },
+    {
+      "id": "handoff_words",
+      "ask": "¿Con qué palabras te piden hablar con una persona? Sepáralas con comas, o escribe \"listo\" para usar: humano, persona, asesor.",
+      "field": "handoff.keywords",
+      "parser": "list",
+      "skipWords": ["listo", "ok"]
+    },
+    {
+      "id": "leads",
+      "ask": "¿Quieres que el asistente guarde el interés de compra de los clientes para darles seguimiento? (sí/no)",
+      "field": "leads.capture",
+      "parser": "yesno"
+    }
   ],
   "countries": {
-    "ecuador": "EC", "ec": "EC", "peru": "PE", "perú": "PE", "pe": "PE", "colombia": "CO", "co": "CO",
-    "mexico": "MX", "méxico": "MX", "mx": "MX", "chile": "CL", "cl": "CL", "bolivia": "BO", "bo": "BO", "argentina": "AR", "ar": "AR"
+    "ecuador": "EC",
+    "ec": "EC",
+    "peru": "PE",
+    "perú": "PE",
+    "pe": "PE",
+    "colombia": "CO",
+    "co": "CO",
+    "mexico": "MX",
+    "méxico": "MX",
+    "mx": "MX",
+    "chile": "CL",
+    "cl": "CL",
+    "bolivia": "BO",
+    "bo": "BO",
+    "argentina": "AR",
+    "ar": "AR"
   },
   "countryDefaults": {
     "EC": { "currency": "USD", "timezone": "America/Guayaquil" },
@@ -28,14 +113,32 @@
     "AR": { "currency": "ARS", "timezone": "America/Argentina/Buenos_Aires" }
   },
   "days": {
-    "lunes": "mon", "lun": "mon", "martes": "tue", "mar": "tue", "miercoles": "wed", "mie": "wed",
-    "jueves": "thu", "jue": "thu", "viernes": "fri", "vie": "fri", "sabado": "sat", "sab": "sat", "domingo": "sun", "dom": "sun"
+    "lunes": "mon",
+    "lun": "mon",
+    "martes": "tue",
+    "mar": "tue",
+    "miercoles": "wed",
+    "mie": "wed",
+    "jueves": "thu",
+    "jue": "thu",
+    "viernes": "fri",
+    "vie": "fri",
+    "sabado": "sat",
+    "sab": "sat",
+    "domingo": "sun",
+    "dom": "sun"
   },
   "yes": ["si", "sí", "claro", "dale", "ok", "por supuesto", "yes"],
   "no": ["no", "nop", "nunca"],
   "defaults": {
     "version": 1,
-    "business": { "industry": "comercio", "country": "EC", "timezone": "America/Guayaquil", "currency": "USD", "languages": ["es"] },
+    "business": {
+      "industry": "comercio",
+      "country": "EC",
+      "timezone": "America/Guayaquil",
+      "currency": "USD",
+      "languages": ["es"]
+    },
     "assistant": {
       "displayName": "Asistente de {business.name}",
       "tone": "cercano",
@@ -45,7 +148,12 @@
     "hours": { "weekly": [], "outsideHoursMessage": "Ahora estamos fuera de horario; te respondemos apenas abramos." },
     "catalog": { "source": "manual", "allowPriceQuotes": true },
     "policies": [],
-    "handoff": { "keywords": ["humano", "persona", "asesor"], "onComplaint": true, "maxAgentTurns": 8, "message": "Te paso con una persona del equipo." },
+    "handoff": {
+      "keywords": ["humano", "persona", "asesor"],
+      "onComplaint": true,
+      "maxAgentTurns": 8,
+      "message": "Te paso con una persona del equipo."
+    },
     "leads": { "capture": true, "fields": ["interest"] },
     "limits": { "maxReplyChars": 600 }
   }

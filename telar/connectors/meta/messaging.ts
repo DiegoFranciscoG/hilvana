@@ -73,7 +73,9 @@ export function parseMessagingWebhook(payload: unknown): InboundEvent[] {
           v: 1,
           channel,
           kind: 'message',
-          eventKey: `${channel}.message.${attachmentType && !str(message.text) ? `attachment_${attachmentType}` : kind}`,
+          eventKey: `${channel}.message.${
+            attachmentType && !str(message.text) ? `attachment_${attachmentType}` : kind
+          }`,
           externalChannelId: accountId,
           occurredAt,
           contact: { externalId: senderId },

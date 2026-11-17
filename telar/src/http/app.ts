@@ -3,7 +3,7 @@
  * responden 200 de inmediato (T-01); el trabajo pesado lo hace el trabajador. La API de la bandeja
  * exige el JWT de Supabase Auth y valida el rol del usuario en el espacio.
  */
-import { Hono, type Context } from '@hono/hono';
+import { type Context, Hono } from '@hono/hono';
 import { bodyLimit } from '@hono/hono/body-limit';
 import { cors } from '@hono/hono/cors';
 import { secureHeaders } from '@hono/hono/secure-headers';
@@ -48,12 +48,15 @@ export function createApp(deps: AppDeps): Hono<Env> {
     c.header('X-Request-Id', id);
   });
   app.use('*', secureHeaders({ contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } }));
-  app.use('/api/*', cors({
-    origin: (origin) => (deps.allowedOrigins.includes(origin) ? origin : null),
-    allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Authorization', 'Content-Type'],
-    maxAge: 600,
-  }));
+  app.use(
+    '/api/*',
+    cors({
+      origin: (origin) => (deps.allowedOrigins.includes(origin) ? origin : null),
+      allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+      allowHeaders: ['Authorization', 'Content-Type'],
+      maxAge: 600,
+    }),
+  );
 
   app.onError((error, c) => {
     deps.logger.error('http_error', { path: c.req.path, requestId: c.get('requestId'), error });
@@ -62,10 +65,20 @@ export function createApp(deps: AppDeps): Hono<Env> {
   app.notFound((c) => c.json({ error: 'not_found' }, 404));
 
   app.get('/healthz', (c) => c.json({ status: 'ok' }));
-  app.get('/readyz', async (c) => ((await deps.ingest.ping().catch(() => false)) ? c.json({ status: 'ready' }) : c.json({ status: 'unavailable' }, 503)));
+  app.get(
+    '/readyz',
+    async (
+      c,
+    ) => ((await deps.ingest.ping().catch(() => false))
+      ? c.json({ status: 'ready' })
+      : c.json({ status: 'unavailable' }, 503)),
+  );
   app.get('/openapi.json', (c) => c.json(openApiDocument));
 
-  const webhookBody = bodyLimit({ maxSize: deps.maxWebhookBytes, onError: (c) => c.json({ error: 'payload_too_large' }, 413) });
+  const webhookBody = bodyLimit({
+    maxSize: deps.maxWebhookBytes,
+    onError: (c) => c.json({ error: 'payload_too_large' }, 413),
+  });
 
   const credentialFor = async (c: Context<Env>, provider: 'meta' | 'shopify') => {
     const credentialId = c.req.param('credentialId') ?? '';
@@ -174,13 +187,13 @@ export function createApp(deps: AppDeps): Hono<Env> {
     await next();
   });
 
-  const requireApi = (c: Context<Env>) => {
+  const requireApi = () => {
     if (!deps.api) throw new Error('API not configured');
     return deps.api;
   };
 
   app.post('/api/conversations/:conversationId/messages', bodyLimit({ maxSize: 16_384 }), async (c) => {
-    const api = requireApi(c);
+    const api = requireApi();
     const conversationId = c.req.param('conversationId');
     if (!UUID.test(conversationId)) return c.json({ error: 'invalid_id' }, 400);
     const body = await c.req.json().catch(() => null) as { text?: unknown } | null;
@@ -197,17 +210,19 @@ export function createApp(deps: AppDeps): Hono<Env> {
   });
 
   app.delete('/api/account', async (c) => {
-    const api = requireApi(c);
+    const api = requireApi();
     const summary = await api.deleteAccount(c.get('user').userId);
     deps.logger.info('account_deleted', { userId: c.get('user').userId });
     return c.json({ status: 'deleted', ...summary });
   });
 
   app.post('/api/workspaces/:workspaceId/agent/preview', bodyLimit({ maxSize: 65_536 }), async (c) => {
-    const api = requireApi(c);
+    const api = requireApi();
     const workspaceId = c.req.param('workspaceId');
     if (!UUID.test(workspaceId)) return c.json({ error: 'invalid_id' }, 400);
-    if ((await api.memberRole(workspaceId, c.get('user').userId)) !== 'owner') return c.json({ error: 'forbidden' }, 403);
+    if ((await api.memberRole(workspaceId, c.get('user').userId)) !== 'owner') {
+      return c.json({ error: 'forbidden' }, 403);
+    }
     const body = await c.req.json().catch(() => null) as { message?: unknown; spec?: unknown } | null;
     const message = typeof body?.message === 'string' ? body.message.slice(0, 1000) : '';
     if (!message) return c.json({ error: 'invalid_message' }, 400);
@@ -216,21 +231,30 @@ export function createApp(deps: AppDeps): Hono<Env> {
 
   app.post('/api/configurator/answer', bodyLimit({ maxSize: 32_768 }), async (c) => {
     if (!deps.configurator) return c.json({ error: 'not_configured' }, 503);
-    const body = await c.req.json().catch(() => null) as { state?: { step?: unknown; answers?: unknown }; text?: unknown } | null;
+    const body = await c.req.json().catch(() => null) as {
+      state?: { step?: unknown; answers?: unknown };
+      text?: unknown;
+    } | null;
     if (!body?.state) return c.json(startInterview(deps.configurator));
     const step = Number(body.state.step);
-    const answers = body.state.answers && typeof body.state.answers === 'object' ? body.state.answers as Record<string, unknown> : {};
-    if (!Number.isInteger(step) || step < 0 || step >= deps.configurator.questions.length || typeof body.text !== 'string') {
+    const answers = body.state.answers && typeof body.state.answers === 'object'
+      ? body.state.answers as Record<string, unknown>
+      : {};
+    if (
+      !Number.isInteger(step) || step < 0 || step >= deps.configurator.questions.length || typeof body.text !== 'string'
+    ) {
       return c.json({ error: 'invalid_state' }, 400);
     }
     return c.json(answerInterview(deps.configurator, { step, answers }, body.text.slice(0, 2000)));
   });
 
   app.post('/api/workspaces/:workspaceId/catalog/sync', async (c) => {
-    const api = requireApi(c);
+    const api = requireApi();
     const workspaceId = c.req.param('workspaceId');
     if (!UUID.test(workspaceId)) return c.json({ error: 'invalid_id' }, 400);
-    if ((await api.memberRole(workspaceId, c.get('user').userId)) !== 'owner') return c.json({ error: 'forbidden' }, 403);
+    if ((await api.memberRole(workspaceId, c.get('user').userId)) !== 'owner') {
+      return c.json({ error: 'forbidden' }, 403);
+    }
     return c.json(await api.syncShopifyCatalog(workspaceId));
   });
 

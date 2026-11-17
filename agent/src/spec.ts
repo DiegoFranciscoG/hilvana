@@ -32,7 +32,9 @@ export const AgentSpecSchema = z.strictObject({
     source: z.enum(['manual', 'shopify']),
     allowPriceQuotes: z.boolean(),
   }),
-  policies: z.array(z.strictObject({ topic: z.string().trim().min(2).max(60), text: z.string().trim().min(2).max(1000) }))
+  policies: z.array(
+    z.strictObject({ topic: z.string().trim().min(2).max(60), text: z.string().trim().min(2).max(1000) }),
+  )
     .max(20),
   handoff: z.strictObject({
     keywords: z.array(z.string().trim().min(2).max(40)).max(30),

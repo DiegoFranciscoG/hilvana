@@ -1,5 +1,13 @@
 import { assert, assertEquals } from '@std/assert';
-import { adminSql, buildTelar, createWorkspace, dropWorkspace, postWebhook, queueLength, whatsappText } from './_harness.ts';
+import {
+  adminSql,
+  buildTelar,
+  createWorkspace,
+  dropWorkspace,
+  postWebhook,
+  queueLength,
+  whatsappText,
+} from './_harness.ts';
 
 const admin = adminSql();
 const telar = await buildTelar();
@@ -14,7 +22,11 @@ Deno.test({
     const calm = await createWorkspace(admin, telar.sql, { agent: false });
     try {
       for (let i = 0; i < 120; i++) {
-        await postWebhook(telar.app, busy, whatsappText(busy, `pedido ${i}`, { from: `59399${String(i).padStart(7, '0')}` }));
+        await postWebhook(
+          telar.app,
+          busy,
+          whatsappText(busy, `pedido ${i}`, { from: `59399${String(i).padStart(7, '0')}` }),
+        );
       }
       await postWebhook(telar.app, calm, whatsappText(calm, 'hola, ¿abren hoy?'));
       assertEquals(await queueLength(admin, busy), 120);
@@ -36,7 +48,10 @@ Deno.test({
       const [busyMessages] = await admin<{ n: number }[]>`
         select count(*)::int as n from public.message where workspace_id = ${busy.id} and direction = 'inbound'`;
       const ceiling = 30 + Math.ceil(elapsedSeconds * 0.5) + 1;
-      assert(busyMessages.n >= 20 && busyMessages.n <= ceiling, `procesados del saturado: ${busyMessages.n} (tope ${ceiling})`);
+      assert(
+        busyMessages.n >= 20 && busyMessages.n <= ceiling,
+        `procesados del saturado: ${busyMessages.n} (tope ${ceiling})`,
+      );
       assertEquals(busyMessages.n + (await queueLength(admin, busy)), 120, 'ningún mensaje se pierde');
     } finally {
       await dropWorkspace(admin, busy);

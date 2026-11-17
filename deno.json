@@ -42,7 +42,8 @@
     "lineWidth": 120,
     "indentWidth": 2,
     "singleQuote": true,
-    "exclude": ["app/", "docs/", "supabase/", "assets/", "**/*.md", "lab/contracts/", "lab/samples/", "sdk/dart/"]
+    "include": ["agent/", "cli/", "lab/", "scripts/", "sdk/ts/", "skill/mcp/", "telar/"],
+    "exclude": ["**/*.md", "lab/contracts/", "lab/samples/", "sdk/ts/contracts/"]
   },
   "lint": {
     "exclude": ["app/", "sdk/dart/", "coverage/", "dist/"]
