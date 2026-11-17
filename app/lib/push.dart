@@ -31,8 +31,7 @@ class PushService {
 
   String get _platform => defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android';
 
-  Future<bool> isEnabled() async =>
-      available && (await SharedPreferences.getInstance()).getBool(_enabledKey) == true;
+  Future<bool> isEnabled() async => available && (await SharedPreferences.getInstance()).getBool(_enabledKey) == true;
 
   /// Una vez por arranque: si los avisos siguen activos y el permiso sigue concedido, renueva el registro.
   Future<void> restore() async {
@@ -40,7 +39,8 @@ class PushService {
     _restored = true;
     final messaging = await _messaging();
     final settings = await messaging.getNotificationSettings();
-    final allowed = settings.authorizationStatus == AuthorizationStatus.authorized ||
+    final allowed =
+        settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional;
     if (!allowed || !await _register(messaging)) await _setEnabled(false);
   }

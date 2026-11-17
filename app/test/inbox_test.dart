@@ -19,11 +19,13 @@ void main() {
     tester.view.physicalSize = const Size(420, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final inbox = FakeInbox(items: [
-      conversation('a', status: ConversationStatus.human, unread: 2),
-      conversation('b', status: ConversationStatus.human, unread: 1),
-      conversation('c'),
-    ]);
+    final inbox = FakeInbox(
+      items: [
+        conversation('a', status: ConversationStatus.human, unread: 2),
+        conversation('b', status: ConversationStatus.human, unread: 1),
+        conversation('c'),
+      ],
+    );
     await tester.pumpWidget(wrap(InboxPage(inbox: inbox), strings));
     await tester.pumpAndSettle();
     expect(find.text('Tienes 2 conversaciones esperando'), findsOneWidget);
@@ -54,7 +56,14 @@ void main() {
 
   testWidgets('fuera de la ventana de 24 h la respuesta no se envía y se explica por qué', (tester) async {
     final inbox = FakeInbox(replyOutcome: ReplyOutcome.windowClosed);
-    await tester.pumpWidget(wrap(Scaffold(body: ConversationView(inbox: inbox, conversationId: 'a')), strings));
+    await tester.pumpWidget(
+      wrap(
+        Scaffold(
+          body: ConversationView(inbox: inbox, conversationId: 'a'),
+        ),
+        strings,
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('composer')), 'Hola, ¿sigues ahí?');
     await tester.tap(find.byKey(const Key('send')));
@@ -66,7 +75,14 @@ void main() {
 
   testWidgets('tomar y devolver la conversación', (tester) async {
     final inbox = FakeInbox();
-    await tester.pumpWidget(wrap(Scaffold(body: ConversationView(inbox: inbox, conversationId: 'a')), strings));
+    await tester.pumpWidget(
+      wrap(
+        Scaffold(
+          body: ConversationView(inbox: inbox, conversationId: 'a'),
+        ),
+        strings,
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('take')));
     await tester.tap(find.byKey(const Key('release')));

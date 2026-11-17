@@ -20,21 +20,25 @@ class HilvanaTheme {
 
   static TextTheme _text(Color color) {
     TextStyle brand(double size, double weight) => TextStyle(
-          fontFamily: brandFont,
-          fontSize: size,
-          height: 1.15,
-          color: color,
-          fontWeight: weight >= 600 ? FontWeight.w600 : FontWeight.w400,
-          fontVariations: [FontVariation('wght', weight), const FontVariation('opsz', 48)],
-        );
+      fontFamily: brandFont,
+      fontSize: size,
+      height: 1.15,
+      color: color,
+      fontWeight: weight >= 600 ? FontWeight.w600 : FontWeight.w400,
+      fontVariations: [FontVariation('wght', weight), const FontVariation('opsz', 48)],
+    );
     TextStyle body(double size, double weight) => TextStyle(
-          fontFamily: textFont,
-          fontSize: size,
-          height: 1.4,
-          color: color,
-          fontWeight: weight >= 600 ? FontWeight.w600 : weight >= 500 ? FontWeight.w500 : FontWeight.w400,
-          fontVariations: [FontVariation('wght', weight)],
-        );
+      fontFamily: textFont,
+      fontSize: size,
+      height: 1.4,
+      color: color,
+      fontWeight: weight >= 600
+          ? FontWeight.w600
+          : weight >= 500
+          ? FontWeight.w500
+          : FontWeight.w400,
+      fontVariations: [FontVariation('wght', weight)],
+    );
     return TextTheme(
       displaySmall: brand(34, 560),
       headlineMedium: brand(28, 560),

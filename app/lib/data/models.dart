@@ -6,20 +6,17 @@ class Workspace {
   final String slug;
   final String name;
 
-  factory Workspace.fromJson(Map<String, dynamic> json) => Workspace(
-        id: json['id'] as String,
-        slug: json['slug'] as String,
-        name: json['name'] as String,
-      );
+  factory Workspace.fromJson(Map<String, dynamic> json) =>
+      Workspace(id: json['id'] as String, slug: json['slug'] as String, name: json['name'] as String);
 }
 
 enum ConversationStatus { agent, human, closed }
 
 ConversationStatus statusFrom(String value) => switch (value) {
-      'human' => ConversationStatus.human,
-      'closed' => ConversationStatus.closed,
-      _ => ConversationStatus.agent,
-    };
+  'human' => ConversationStatus.human,
+  'closed' => ConversationStatus.closed,
+  _ => ConversationStatus.agent,
+};
 
 class ConversationSummary {
   const ConversationSummary({
@@ -66,17 +63,17 @@ class ChatMessage {
   bool get inbound => author == MessageAuthor.contact;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
-        id: json['id'] as String,
-        author: switch (json['author'] as String) {
-          'agent' => MessageAuthor.agent,
-          'human' => MessageAuthor.human,
-          'system' => MessageAuthor.system,
-          _ => MessageAuthor.contact,
-        },
-        body: (json['body'] as String?) ?? '',
-        status: json['status'] as String,
-        createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
-      );
+    id: json['id'] as String,
+    author: switch (json['author'] as String) {
+      'agent' => MessageAuthor.agent,
+      'human' => MessageAuthor.human,
+      'system' => MessageAuthor.system,
+      _ => MessageAuthor.contact,
+    },
+    body: (json['body'] as String?) ?? '',
+    status: json['status'] as String,
+    createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
+  );
 }
 
 enum ReplyOutcome { sent, windowClosed, failed }

@@ -31,7 +31,8 @@ class SupabaseAuthRepository implements AuthRepository {
 }
 
 class SupabaseInboxRepository implements InboxRepository {
-  SupabaseInboxRepository(this._client, this._telarUrl, {http.Client? httpClient}) : _http = httpClient ?? http.Client();
+  SupabaseInboxRepository(this._client, this._telarUrl, {http.Client? httpClient})
+    : _http = httpClient ?? http.Client();
 
   final SupabaseClient _client;
   final String _telarUrl;
@@ -39,9 +40,9 @@ class SupabaseInboxRepository implements InboxRepository {
   final Map<String, ({String name, String channel})> _contacts = {};
 
   Map<String, String> get _authHeaders => {
-        'Authorization': 'Bearer ${_client.auth.currentSession?.accessToken ?? ''}',
-        'Content-Type': 'application/json',
-      };
+    'Authorization': 'Bearer ${_client.auth.currentSession?.accessToken ?? ''}',
+    'Content-Type': 'application/json',
+  };
 
   @override
   Future<List<Workspace>> workspaces() async {
@@ -124,14 +125,16 @@ class SupabaseInboxRepository implements InboxRepository {
   }
 
   @override
-  Future<void> take(String conversationId) => _client.rpc('take_conversation', params: {'p_conversation_id': conversationId});
+  Future<void> take(String conversationId) =>
+      _client.rpc('take_conversation', params: {'p_conversation_id': conversationId});
 
   @override
   Future<void> release(String conversationId) =>
       _client.rpc('release_conversation', params: {'p_conversation_id': conversationId});
 
   @override
-  Future<void> close(String conversationId) => _client.rpc('close_conversation', params: {'p_conversation_id': conversationId});
+  Future<void> close(String conversationId) =>
+      _client.rpc('close_conversation', params: {'p_conversation_id': conversationId});
 
   @override
   Future<void> markRead(String conversationId) =>

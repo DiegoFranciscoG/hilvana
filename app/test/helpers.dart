@@ -49,21 +49,23 @@ class FakeInbox implements InboxRepository {
   final List<String> actions = [];
 
   @override
-  Future<List<Workspace>> workspaces() async => const [Workspace(id: 'w1', slug: 'panaderia', name: 'Panadería La Espiga')];
+  Future<List<Workspace>> workspaces() async => const [
+    Workspace(id: 'w1', slug: 'panaderia', name: 'Panadería La Espiga'),
+  ];
 
   @override
   Stream<List<ConversationSummary>> conversations(String workspaceId) => Stream.value(items);
 
   @override
   Stream<List<ChatMessage>> messages(String conversationId) => Stream.value([
-        ChatMessage(
-          id: 'm1',
-          author: MessageAuthor.contact,
-          body: '¿Tienen humitas?',
-          status: 'received',
-          createdAt: DateTime(2026, 11, 16, 9, 30),
-        ),
-      ]);
+    ChatMessage(
+      id: 'm1',
+      author: MessageAuthor.contact,
+      body: '¿Tienen humitas?',
+      status: 'received',
+      createdAt: DateTime(2026, 11, 16, 9, 30),
+    ),
+  ]);
 
   @override
   Future<ReplyOutcome> reply(String conversationId, String text) async {
@@ -111,6 +113,6 @@ ConversationSummary conversation(String id, {ConversationStatus status = Convers
 Future<Strings> loadStrings() => Strings.load(rootBundle);
 
 Widget wrap(Widget child, Strings strings) => StringsScope(
-      strings: strings,
-      child: MaterialApp(theme: HilvanaTheme.light(), home: child),
-    );
+  strings: strings,
+  child: MaterialApp(theme: HilvanaTheme.light(), home: child),
+);

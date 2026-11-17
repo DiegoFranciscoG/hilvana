@@ -106,11 +106,7 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: Text(strings.t('privacyBody')),
           ),
           const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: StitchDivider()),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: Text(strings.t('signOut')),
-            onTap: _signOut,
-          ),
+          ListTile(leading: const Icon(Icons.logout), title: Text(strings.t('signOut')), onTap: _signOut),
           ListTile(
             key: const Key('delete-account'),
             leading: Icon(Icons.delete_outline, color: theme.colorScheme.error),

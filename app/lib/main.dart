@@ -19,10 +19,12 @@ Future<void> main() async {
   final client = Supabase.instance.client;
   final inbox = SupabaseInboxRepository(client, config.telarUrl);
   final strings = await Strings.load(rootBundle);
-  runApp(HilvanaApp(
-    auth: SupabaseAuthRepository(client),
-    inbox: inbox,
-    strings: strings,
-    push: PushService(config.firebase, inbox),
-  ));
+  runApp(
+    HilvanaApp(
+      auth: SupabaseAuthRepository(client),
+      inbox: inbox,
+      strings: strings,
+      push: PushService(config.firebase, inbox),
+    ),
+  );
 }

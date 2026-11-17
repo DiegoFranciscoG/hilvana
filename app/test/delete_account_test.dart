@@ -32,7 +32,9 @@ void main() {
   testWidgets('cancelar no borra nada', (tester) async {
     final inbox = FakeInbox();
     var deleted = false;
-    await tester.pumpWidget(wrap(SettingsPage(auth: FakeAuth(signedIn: true), inbox: inbox, onDeleted: () => deleted = true), strings));
+    await tester.pumpWidget(
+      wrap(SettingsPage(auth: FakeAuth(signedIn: true), inbox: inbox, onDeleted: () => deleted = true), strings),
+    );
     await tester.tap(find.byKey(const Key('delete-account')));
     await tester.pumpAndSettle();
     await tester.tap(find.text(strings.t('cancel')));
@@ -44,7 +46,9 @@ void main() {
   testWidgets('si el servidor falla, avisa y no sale de la pantalla', (tester) async {
     final inbox = FakeInbox(failDelete: true);
     var deleted = false;
-    await tester.pumpWidget(wrap(SettingsPage(auth: FakeAuth(signedIn: true), inbox: inbox, onDeleted: () => deleted = true), strings));
+    await tester.pumpWidget(
+      wrap(SettingsPage(auth: FakeAuth(signedIn: true), inbox: inbox, onDeleted: () => deleted = true), strings),
+    );
     await tester.tap(find.byKey(const Key('delete-account')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('confirm-delete')));

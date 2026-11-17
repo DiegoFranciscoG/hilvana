@@ -20,7 +20,12 @@ class AppConfig {
 
   static Future<AppConfig> load() async {
     if (_url.isNotEmpty && _key.isNotEmpty && _telar.isNotEmpty) {
-      return AppConfig(supabaseUrl: _url, supabaseAnonKey: _key, telarUrl: _telar, firebase: FirebaseConfig.fromEnvironment());
+      return AppConfig(
+        supabaseUrl: _url,
+        supabaseAnonKey: _key,
+        telarUrl: _telar,
+        firebase: FirebaseConfig.fromEnvironment(),
+      );
     }
     if (kIsWeb) {
       final response = await http.get(Uri.base.resolve('/config.json'));
