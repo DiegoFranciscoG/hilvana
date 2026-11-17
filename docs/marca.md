@@ -12,6 +12,7 @@ clientes que llegan por distintos canales en una sola conversación, sin coser n
 | `assets/brand/icono.svg` | Ícono de app (512 × 512, esquinas redondeadas). |
 | `assets/brand/simbolo.svg` | Símbolo solo, para estados vacíos y favicon. |
 | `assets/brand/mono.svg` | Versión monocromática. |
+| `app/assets/brand/logo*.svg` | Variantes para la app, generadas por `scripts/app-icons.sh`: sin lienzo de fondo y sin el lema (a 72 px es ilegible; la entrada lo muestra como texto). |
 
 El símbolo es una burbuja de conversación cosida con puntadas de hilván, tres hebras que entran (los
 canales) y se juntan en un solo hilo, y la aguja que las une.
