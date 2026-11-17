@@ -2,7 +2,7 @@
 -- El Telar llama a private.delete_account_data() y luego borra el usuario en Auth, lo que
 -- elimina sus sesiones (auth.sessions en cascada) y cierra la sesión en todos sus dispositivos.
 begin;
-select plan(9);
+select plan(10);
 
 do $$
 begin
@@ -25,15 +25,9 @@ select tests.user_id('rosa') as rosa, tests.user_id('saul') as saul,
        tests.workspace_id('taller-rosa') as ws_solo, tests.workspace_id('bodega-compartida') as ws_shared \gset
 select secret_id as solo_secret from public.credential where workspace_id = :'ws_solo' \gset
 
--- Una sesión activa de Rosa (solo existe si la base trae el esquema completo de Auth).
-do $$
-begin
-  if to_regclass('auth.sessions') is not null then
-    execute 'insert into auth.sessions (id, user_id, created_at, updated_at) values (gen_random_uuid(), $1, now(), now())'
-      using tests.user_id('rosa');
-  end if;
-end
-$$;
+-- Una sesión activa de Rosa (el esquema de Auth lo crea GoTrue, como en el compose y en la nube).
+insert into auth.sessions (id, user_id, created_at, updated_at) values (gen_random_uuid(), :'rosa', now(), now());
+select is(tests.auth_sessions(:'rosa'), 1, 'Rosa tiene una sesión abierta antes de eliminar su cuenta');
 
 select tests.act_as_telar(null) \g /dev/null
 select results_eq(
@@ -58,7 +52,7 @@ select is_empty(format('select 1 from public.device_token where user_id = %L', :
 
 -- Lo que hace la API de Auth al eliminar el usuario.
 select lives_ok(format('delete from auth.users where id = %L', :'rosa'), 'El usuario se puede borrar de Auth');
-select ok(tests.auth_sessions(:'rosa') in (0, -1), 'No quedan sesiones del usuario (cierre en todos los dispositivos)');
+select is(tests.auth_sessions(:'rosa'), 0, 'No quedan sesiones del usuario (cierre en todos los dispositivos)');
 
 select * from finish();
 rollback;
