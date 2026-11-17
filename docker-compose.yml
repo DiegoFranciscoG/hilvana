@@ -192,10 +192,14 @@ services:
       DEMO_PASSWORD: ${DEMO_PASSWORD:?Define DEMO_PASSWORD (deno task cli init)}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}
       SEED_AUTH_URL: http://auth:9999
+    # Solo lo que la semilla usa: nada de .env ni del resto del repositorio.
     volumes:
-      - .:/app:ro
+      - ./deno.json:/app/deno.json:ro
+      - ./deno.lock:/app/deno.lock:ro
+      - ./scripts:/app/scripts:ro
+      - ./agent:/app/agent:ro
       - deno-cache:/deno-dir
-    command: ["run", "--allow-net=db:5432,auth:9999", "--allow-env", "--allow-read=/app", "scripts/demo_seed.ts"]
+    command: ["run", "--frozen", "--allow-net=db:5432,auth:9999", "--allow-env", "--allow-read=/app/agent/evals", "scripts/demo_seed.ts"]
 
 volumes:
   db-data:

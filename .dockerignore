@@ -13,3 +13,7 @@ lab/.captures
 supabase/.temp
 supabase/.branches
 *.log
+# Documentos de trabajo y originales de marca de la raíz: nunca viajan al contexto de build.
+*.docx
+~$*
+/*.svg
