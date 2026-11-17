@@ -1,6 +1,8 @@
 # Entorno para compilar la app Android: la imagen de Flutter (etapa `flutter` de docker/web.Dockerfile)
 # más OpenJDK 21 de Debian y el SDK de Android con las herramientas oficiales de línea de comandos,
 # verificadas con el SHA-256 que publica developer.android.com. Versiones en toolchain.env.
+# Corre como root a propósito: es una herramienta local de un solo uso (no es un servicio, no abre puertos
+# ni se publica) que escribe en las cachés del SDK de Flutter y de Android de la propia imagen.
 ARG FLUTTER_IMAGE=hilvana-flutter:3.50.0
 FROM ${FLUTTER_IMAGE}
 ARG ANDROID_CMDLINE_TOOLS
