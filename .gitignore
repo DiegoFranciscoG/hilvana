@@ -52,3 +52,6 @@ Thumbs.db
 # Documentos de trabajo de Office: no son parte del código
 *.docx
 ~$*
+
+# Valores de la app móvil por entorno (--dart-define-from-file); plantilla en app/dart-defines.example.json
+app/dart-defines.json
