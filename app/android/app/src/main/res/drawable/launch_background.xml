@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo de arranque con el color de la marca (en Android 12+ el sistema dibuja además el ícono). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/hilvana_fondo" />
+</layer-list>

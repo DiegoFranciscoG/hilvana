@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lino (fondo claro de la marca) para el arranque y el fondo del ícono adaptable. -->
+    <color name="hilvana_fondo">#F2ECE1</color>
+    <color name="ic_launcher_background">#F2ECE1</color>
+</resources>

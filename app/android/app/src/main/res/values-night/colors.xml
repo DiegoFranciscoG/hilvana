@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Superficie del tema oscuro de la app (lib/theme.dart). -->
+    <color name="hilvana_fondo">#172238</color>
+</resources>
