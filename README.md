@@ -124,6 +124,18 @@ deno task worker                         # trabajador en otra terminal
 En Linux con Nix: `nix develop` y luego `deno task cli up`. El runtime nativo de Supabase sin Docker es
 experimental y solo existe en Linux y macOS.
 
+App Android en Docker (JDK y SDK oficiales, versiones en `toolchain.env`):
+
+```bash
+cp app/dart-defines.example.json app/dart-defines.json   # URL de Supabase, clave pública y URL del Telar
+./scripts/build-android.sh                               # APK: app/build/app/outputs/flutter-apk/app-release.apk
+./scripts/build-android.sh appbundle                     # App Bundle para Google Play
+```
+
+Sin las variables `HILVANA_ANDROID_*` el paquete sale firmado en modo depuración (sirve para probar en un
+teléfono; Google Play lo rechaza). Para un teléfono, la URL de Supabase debe ser alcanzable desde él (la
+nube o `deno task cli tunnel`), no `localhost`.
+
 ## Variables de entorno
 
 | Variable | Descripción | Obligatoria |
@@ -176,8 +188,8 @@ cd app && flutter test                 # 10 pruebas de widgets de la app
 ```
 
 Verificado el 2026-11-17 con Docker: todo lo anterior en verde, `flutter analyze` sin observaciones,
-`flutter build web` y `flutter build linux` correctos, y el stack completo con login real, RLS y semilla.
-Android e iOS no se compilaron aquí (sin SDK de Android ni macOS).
+`flutter build web`, `flutter build linux` y el APK de Android correctos, y el stack completo con login
+real, RLS y semilla. iOS no se compiló (requiere macOS).
 
 | Prueba | Qué verifica | Dónde |
 |---|---|---|
@@ -240,7 +252,7 @@ tarjeta.** Costos y pasos: [docs/nube.md](docs/nube.md).
 - [ ] Plantillas de WhatsApp administradas desde la app.
 - [ ] Carga del catálogo manual desde la app y desde CSV.
 - [ ] Build de iOS en Codemagic y envío a TestFlight.
-- [ ] Compilar y probar Android e iOS en teléfonos reales, con avisos push de un proyecto de Firebase propio.
+- [ ] Probar en teléfonos reales (Android e iOS) con avisos push de un proyecto de Firebase propio; compilar iOS en macOS.
 - [ ] Tarifas oficiales de WhatsApp por mercado para calcular costos por mensaje.
 
 ## Fuentes de datos y licencias

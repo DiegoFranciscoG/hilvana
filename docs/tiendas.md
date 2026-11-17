@@ -68,6 +68,8 @@ ficticios. Antes de subirlas, revisa los tamaños que pide cada tienda ese día.
 - [x] Carpetas de plataforma (`flutter create --platforms=android,ios,web,linux`) personalizadas: id
   `io.github.diegofranciscog.hilvana`, nombre, íconos desde `assets/brand` (`scripts/app-icons.sh`) y
   `targetSdk 36` (valor de Flutter 3.50).
+- [x] El APK y el App Bundle compilan en Docker: `./scripts/build-android.sh [appbundle]`, con los valores
+  de `app/dart-defines.json` (plantilla en `app/dart-defines.example.json`).
 - [ ] Firma de Android con el almacén de llaves propio: `HILVANA_ANDROID_KEYSTORE`,
   `HILVANA_ANDROID_KEYSTORE_PASSWORD`, `HILVANA_ANDROID_KEY_ALIAS` y `HILVANA_ANDROID_KEY_PASSWORD` en el
   entorno de la shell al compilar; sin ellas el paquete sale firmado en modo depuración y Google Play lo rechaza.

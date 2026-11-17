@@ -86,6 +86,7 @@ Diferencias con el documento del plan: **Flutter 3.50.0 + Dart 3.14.0** (no 3.44
 | Integración del Telar (`scripts/test-integration.sh`) | 9 pruebas en verde: T-01, T-02, T-07, T-10, T-11, laboratorio y aislamiento del rol. |
 | Deno 2.9.8 | `check`, `lint`, `fmt`, 68 pruebas (84,9 % de líneas) y evaluación 50/50. |
 | App Flutter 3.50.0 | `pub get` con lockfile, `analyze` sin observaciones, 10 pruebas, `build web` y `build linux` correctos. |
+| Android (`scripts/build-android.sh`) | APK de publicación de 56,6 MB con AGP 9.3.1 y Gradle 9.5.0 sobre OpenJDK 21 (#64 a #67): `io.github.diegofranciscog.hilvana` 0.1.0 (1), `minSdk` 24, `targetSdk` 36, arm64-v8a, armeabi-v7a y x86_64, permiso de Internet y el manifiesto final con FCM por FID y sin inicialización automática. Firmado en modo depuración (sin las variables `HILVANA_ANDROID_*`). Primera compilación 17 min; con caché, 3 min. El App Bundle (`appbundle`, 56,0 MB) también compila. |
 | Stack completo (`docker compose up --build`, `deno task cli up`) | Todos los servicios sanos; login real de la demo, RLS (la agente solo ve su espacio y ninguna credencial) y 401 sin sesión. |
 | Nix | `flake.lock` con `nixos-26.05` (2026-11-15) y `nixos-unstable` (2026-11-13); `nix develop` entrega Deno 2.9.8, Node 24, psql 17.12, gitleaks 8.30.1, cloudflared 2026.10.7 y jq 1.8.2. |
 | Capturas | `docker compose --profile tools run --rm screenshots` → `docs/img/`. |
@@ -96,5 +97,9 @@ borrar un espacio (cascada), variables de compose pisadas por el entorno de la s
 entorno de Deno para postgres.js, Auth y migraciones en paralelo, permiso de Internet en Android de
 publicación, API de avisos push deprecada (#57, #58) y diseño en teléfonos angostos.
 
-Sin verificar aquí: compilación de Android (sin SDK) e iOS (sin macOS), avisos push reales (sin proyecto de
-Firebase) y el job T-12 completo en un Linux limpio, que corre en la CI.
+Sin verificar aquí: la app en un teléfono real, la compilación de iOS (requiere macOS), avisos push reales (sin
+proyecto de Firebase) y el job T-12 completo en un Linux limpio, que corre en la CI.
+
+Avisos de la compilación de Android para seguir: `firebase_core` aplica el plugin de Kotlin de Gradle, que una
+versión futura de Flutter dejará de aceptar (hay que actualizarlo cuando el plugin migre a Kotlin integrado), y
+una dependencia referencia la fuente de íconos de Cupertino que la app no usa (sin efecto en la app).

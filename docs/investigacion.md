@@ -101,6 +101,10 @@ queda en la sección de **Supuestos**. Si dos fuentes se contradicen, gana la of
 | 61 | supabase/auth v2.197.0 — `internal/conf/configuration.go` | https://github.com/supabase/auth/blob/v2.197.0/internal/conf/configuration.go | 2026-11-17 | HS256 con los bytes crudos de `GOTRUE_JWT_SECRET`; roles de administración por defecto `service_role` y `supabase_admin`. |
 | 62 | PostgREST — Configuration | https://docs.postgrest.org/en/latest/references/configuration.html | 2026-11-17 | `db-use-legacy-gucs` ya no existe (se quitó del compose); `request.jwt.claims` es la única variable de claims. |
 | 63 | Docker Docs — Compose: variable interpolation | https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/ | 2026-11-17 | Precedencia: entorno de la shell, luego `--env-file`, luego `.env` → prefijo `HILVANA_` en lo que interpola el compose. |
+| 64 | Android Developers — Android Studio (herramientas de línea de comandos) | https://developer.android.com/studio | 2026-11-17 | `commandlinetools-linux-15859902_latest.zip` (181,8 MB) y su SHA-256, fijados en `toolchain.env`. |
+| 65 | Android Developers — Android Gradle plugin 9.3.0 release notes | https://developer.android.com/build/releases/agp-9-3-0-release-notes | 2026-11-17 | Gradle 9.5.0, SDK Build Tools 36.0.0, NDK por defecto 28.2.13676358 y JDK 17 como mínimo. |
+| 66 | Flutter 3.50.0 — `FlutterExtension.kt` | https://github.com/flutter/flutter/blob/3.50.0/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt | 2026-11-17 | `compileSdk` 36, `targetSdk` 36, `minSdk` 24 y `ndkVersion` 28.2.13676358. |
+| 67 | Debian — paquete `openjdk-21-jdk-headless` (trixie) | https://packages.debian.org/trixie/openjdk-21-jdk-headless | 2026-11-17 | OpenJDK 21.0.13 en Debian 13, la base de la imagen de Flutter. |
 
 ## Supuestos (no verificados del todo)
 
