@@ -24,8 +24,11 @@ begin
     return new;
   end if;
   v_workspace := coalesce((v_row ->> 'workspace_id')::uuid, case when tg_table_name = 'workspace' then (v_row ->> 'id')::uuid end);
-  -- Al borrar un espacio sus filas de auditoría se van en cascada: no se registra el borrado.
-  if tg_op = 'DELETE' and (tg_table_name = 'workspace' or pg_trigger_depth() > 1) then
+  -- Al borrar un espacio, su auditoría se va en cascada y no se registra el borrado de sus filas.
+  -- Las cascadas de llaves foráneas disparan al final de la sentencia (pg_trigger_depth() = 1), así
+  -- que se reconocen porque el espacio ya no existe.
+  if tg_op = 'DELETE' and (tg_table_name = 'workspace'
+      or (v_workspace is not null and not exists (select 1 from public.workspace w where w.id = v_workspace))) then
     return old;
   end if;
   insert into public.audit_log (workspace_id, actor_id, actor_kind, action, entity, entity_id, details)

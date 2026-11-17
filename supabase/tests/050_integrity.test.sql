@@ -1,7 +1,7 @@
 -- Integridad: idempotencia a nivel de base (T-02), llaves que impiden cruzar espacios,
 -- versiones publicadas inmutables y al menos un dueño por espacio.
 begin;
-select plan(9);
+select plan(12);
 
 do $$
 declare
@@ -73,6 +73,23 @@ select throws_ok(format('delete from public.agent_spec where id = %L', :'spec'),
 -- Siempre queda un dueño.
 select throws_ok(format('delete from public.member where workspace_id = %L and user_id = %L', :'ws', tests.user_id('vale')),
   '23514', null, 'No se puede quitar al único dueño');
+
+-- Auditoría: quitar a alguien de un espacio que sigue existiendo queda registrado; borrar el espacio
+-- completo no choca con su auditoría y se la lleva en cascada.
+select tests.create_user('wil') \g /dev/null
+insert into public.member (workspace_id, user_id, role) values (:'ws', tests.user_id('wil'), 'agent');
+delete from public.member where workspace_id = :'ws' and user_id = tests.user_id('wil');
+select results_eq(
+  format($$select action, details ->> 'role' from public.audit_log
+           where workspace_id = %L and entity = 'member' and details ->> 'user_id' = %L order by id$$,
+         :'ws', tests.user_id('wil')),
+  $$ values ('insert'::text, 'agent'::text), ('delete', 'agent') $$,
+  'Agregar y quitar a un miembro queda en la auditoría');
+select tests.authenticate_as('vale') \g /dev/null
+select lives_ok(format('select public.delete_workspace(%L::uuid)', :'ws2'), 'Borrar un espacio completo no choca con su auditoría');
+select tests.reset_role() \g /dev/null
+select is_empty(format('select 1 from public.audit_log where workspace_id = %L', :'ws2'),
+  'La auditoría del espacio borrado se va con él');
 
 select * from finish();
 rollback;
