@@ -38,8 +38,12 @@ services:
   migrate:
     image: supabase/postgres:17.11.0.018
     restart: "no"
+    # Auth migra su esquema al arrancar (auth.uid() con request.jwt.claims, auth.sessions); las
+    # migraciones de Hilvana van después, como en la nube y en la CLI.
     depends_on:
       db:
+        condition: service_healthy
+      auth:
         condition: service_healthy
     entrypoint: ["sh", "-c", "/scripts/db-migrate.sh && /scripts/db-bootstrap.sh"]
     environment:
@@ -97,7 +101,6 @@ services:
       PGRST_DB_MAX_ROWS: 200
       PGRST_DB_ANON_ROLE: anon
       PGRST_JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET}
-      PGRST_DB_USE_LEGACY_GUCS: "false"
       PGRST_ADMIN_SERVER_PORT: 3001
       PGRST_ADMIN_SERVER_HOST: localhost
 
