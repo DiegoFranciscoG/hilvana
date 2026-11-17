@@ -28,6 +28,11 @@ COPY app/ ./
 RUN flutter build web --release --no-web-resources-cdn
 
 FROM nginxinc/nginx-unprivileged:1.31.7-alpine
+# Parches de Alpine publicados después de la imagen base (trivy marcó brotli, curl, expat, libxslt, musl
+# y zlib el 2026-11-17); luego vuelve al usuario sin privilegios de la imagen (101).
+USER root
+RUN apk upgrade --no-cache
+USER 101
 COPY docker/gateway/default.conf /etc/nginx/conf.d/default.conf
 COPY --chmod=0755 docker/gateway/40-config-json.sh /docker-entrypoint.d/40-config-json.sh
 COPY --from=build /src/build/web /usr/share/nginx/html

@@ -1,5 +1,7 @@
 # Telar (pasarela y trabajador). Multietapa: dependencias en caché y ejecución en imagen distroless
-# sin shell, como usuario no root, con permisos de Deno acotados.
+# sin shell, como usuario no root, con permisos de Deno acotados. La base es la distroless "cc" de
+# Google fijada por digest (se reconstruye con cada parche de Debian; Dependabot propone el digest
+# nuevo) con el binario oficial de Deno, como documenta denoland/deno para imágenes propias.
 ARG DENO_VERSION=2.9.8
 
 FROM denoland/deno:${DENO_VERSION} AS deps
@@ -12,10 +14,13 @@ COPY lab/src ./lab/src
 COPY lab/config ./lab/config
 RUN deno cache --frozen telar/src/main.ts telar/src/worker_main.ts telar/healthcheck.ts
 
-FROM denoland/deno:distroless-${DENO_VERSION}
+FROM denoland/deno:bin-${DENO_VERSION} AS deno-bin
+
+FROM gcr.io/distroless/cc-debian13:nonroot@sha256:cb87acc574abe719b6e5c547384defa2f7b1f24af9605d3f618cf852495d8be2
 WORKDIR /app
 ENV DENO_DIR=/deno-dir \
     DENO_NO_UPDATE_CHECK=1
+COPY --from=deno-bin /deno /usr/local/bin/deno
 COPY --from=deps --chown=65532:65532 /deno-dir /deno-dir
 COPY --from=deps --chown=65532:65532 /app /app
 USER 65532:65532

@@ -89,6 +89,7 @@ Diferencias con el documento del plan: **Flutter 3.50.0 + Dart 3.14.0** (no 3.44
 | Stack completo (`docker compose up --build`, `deno task cli up`) | Todos los servicios sanos; login real de la demo, RLS (la agente solo ve su espacio y ninguna credencial) y 401 sin sesión. |
 | Nix | `flake.lock` con `nixos-26.05` (2026-11-15) y `nixos-unstable` (2026-11-13); `nix develop` entrega Deno 2.9.8, Node 24, psql 17.12, gitleaks 8.30.1, cloudflared 2026.10.7 y jq 1.8.2. |
 | Capturas | `docker compose --profile tools run --rm screenshots` → `docs/img/`. |
+| Imágenes propias con trivy 0.76.2 (altas y críticas con arreglo) | La distroless de Deno traía zlib vulnerable y nginx-unprivileged 1.31.7, 13 paquetes de Alpine. El Telar pasa a la distroless "cc" de Google fijada por digest con el binario oficial de Deno; la pasarela aplica `apk upgrade`. Resultado: 0 en Telar, trabajador y pasarela. Las imágenes de Supabase quedan en las versiones que fija su CLI. |
 
 Errores reales que la verificación encontró y se corrigieron (cada uno con su commit `fix`): auditoría al
 borrar un espacio (cascada), variables de compose pisadas por el entorno de la shell (#63), permisos de
