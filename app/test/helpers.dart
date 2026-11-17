@@ -91,6 +91,9 @@ class FakeInbox implements InboxRepository {
 
   @override
   Future<void> registerDeviceToken(String token, String platform) async {}
+
+  @override
+  Future<void> unregisterDeviceToken(String token) async {}
 }
 
 ConversationSummary conversation(String id, {ConversationStatus status = ConversationStatus.agent, int unread = 0}) =>

@@ -22,6 +22,20 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _deleting = false;
   bool _pushEnabled = false;
 
+  @override
+  void initState() {
+    super.initState();
+    widget.push?.isEnabled().then((on) {
+      if (mounted) setState(() => _pushEnabled = on);
+    });
+  }
+
+  Future<void> _signOut() async {
+    // Los avisos son de la persona, no del teléfono: al salir se da de baja este dispositivo.
+    await widget.push?.disable();
+    await widget.auth.signOut();
+  }
+
   Future<void> _confirmDelete() async {
     final strings = StringsScope.of(context);
     final confirmed = await showDialog<bool>(
@@ -78,6 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ? (on) async {
                     if (!on) {
                       setState(() => _pushEnabled = false);
+                      await widget.push!.disable();
                       return;
                     }
                     final ok = await widget.push!.enable();
@@ -94,7 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ListTile(
             leading: const Icon(Icons.logout),
             title: Text(strings.t('signOut')),
-            onTap: () => widget.auth.signOut(),
+            onTap: _signOut,
           ),
           ListTile(
             key: const Key('delete-account'),

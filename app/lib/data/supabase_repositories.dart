@@ -153,4 +153,8 @@ class SupabaseInboxRepository implements InboxRepository {
   @override
   Future<void> registerDeviceToken(String token, String platform) =>
       _client.rpc('register_device_token', params: {'p_token': token, 'p_platform': platform});
+
+  @override
+  Future<void> unregisterDeviceToken(String token) =>
+      _client.rpc('unregister_device_token', params: {'p_token': token});
 }

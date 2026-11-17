@@ -326,7 +326,8 @@ $$;
 revoke execute on function public.ack_contract_alert(uuid) from public, anon;
 grant execute on function public.ack_contract_alert(uuid) to authenticated;
 
--- Registrar el token de push del dispositivo actual.
+-- Registrar el destino de push del dispositivo actual: el ID de instalación de Firebase (FID) que
+-- el Telar usa en el campo `fid` de la API HTTP v1 de FCM.
 create or replace function public.register_device_token(p_token text, p_platform text)
 returns void
 language plpgsql
@@ -344,6 +345,23 @@ end
 $$;
 revoke execute on function public.register_device_token(text, text) from public, anon;
 grant execute on function public.register_device_token(text, text) to authenticated;
+
+-- Dar de baja el dispositivo (avisos apagados o sesión cerrada). Solo borra filas de quien llama.
+create or replace function public.unregister_device_token(p_token text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if (select auth.uid()) is null then
+    raise exception 'authentication required' using errcode = '42501';
+  end if;
+  delete from public.device_token where token = p_token and user_id = (select auth.uid());
+end
+$$;
+revoke execute on function public.unregister_device_token(text) from public, anon;
+grant execute on function public.unregister_device_token(text) to authenticated;
 
 -- Eliminación de cuenta (Apple 5.1.1(v), Google Play; T-11). La llama el Telar después de
 -- verificar el JWT; luego borra el usuario con la API de administración de Auth, que cierra

@@ -23,5 +23,8 @@ abstract class InboxRepository {
   /// Elimina la cuenta en el servidor (datos y usuario de Auth) y cierra la sesión en todos los
   /// dispositivos (Apple 5.1.1(v), Google Play).
   Future<void> deleteAccount();
+
+  /// Destino de avisos push de este dispositivo (el FID de Firebase).
   Future<void> registerDeviceToken(String token, String platform);
+  Future<void> unregisterDeviceToken(String token);
 }

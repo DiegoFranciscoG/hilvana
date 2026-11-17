@@ -74,7 +74,20 @@ class _HilvanaAppState extends State<HilvanaApp> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    _refresh.addListener(_restorePush);
+    _restorePush();
+  }
+
+  /// Con sesión abierta, renueva el registro de avisos si la persona los dejó activos.
+  void _restorePush() {
+    if (widget.auth.isSignedIn) widget.push?.restore().ignore();
+  }
+
+  @override
   void dispose() {
+    _refresh.removeListener(_restorePush);
     _router.dispose();
     _refresh.dispose();
     super.dispose();

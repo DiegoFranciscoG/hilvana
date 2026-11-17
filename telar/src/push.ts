@@ -1,7 +1,9 @@
 /**
  * Avisos push con Firebase Cloud Messaging (API HTTP v1) cuando una conversación pasa a una persona.
- * La cuenta de servicio llega por entorno (FCM_SERVICE_ACCOUNT_B64) y nunca se registra. El aviso no
- * incluye el contenido del mensaje del cliente (minimización: no se muestra en la pantalla bloqueada).
+ * Cada dispositivo se identifica por su ID de instalación de Firebase (campo `fid`; `token` está
+ * deprecado). La cuenta de servicio llega por entorno (FCM_SERVICE_ACCOUNT_B64) y nunca se registra.
+ * El aviso no incluye el contenido del mensaje del cliente (minimización: no se muestra en la
+ * pantalla bloqueada).
  */
 import { bytesToBase64 } from '../connectors/crypto.ts';
 import type { Logger } from './log.ts';
@@ -84,7 +86,11 @@ export class FcmNotifier implements Notifier {
         method: 'POST',
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: { token, notification: { title: 'Hilvana', body: text }, data: { workspaceId, kind: 'handoff' } },
+          message: {
+            fid: token,
+            notification: { title: 'Hilvana', body: text },
+            data: { workspaceId, kind: 'handoff' },
+          },
         }),
         signal: AbortSignal.timeout(10_000),
       });
