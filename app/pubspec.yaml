@@ -14,7 +14,7 @@ dependencies:
   firebase_core: 5.1.0
   firebase_messaging: 17.0.1
   go_router: 18.1.4
-  flutter_svg: 2.4.0
+  flutter_svg: 2.5.0
   http: 1.6.0
   intl: any
   material_ui: 1.11.0
