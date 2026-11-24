@@ -16,7 +16,7 @@ RUN deno cache --frozen telar/src/main.ts telar/src/worker_main.ts telar/healthc
 
 FROM denoland/deno:bin-${DENO_VERSION} AS deno-bin
 
-FROM gcr.io/distroless/cc-debian13:nonroot@sha256:cb87acc574abe719b6e5c547384defa2f7b1f24af9605d3f618cf852495d8be2
+FROM gcr.io/distroless/cc-debian13:nonroot@sha256:532c7a94f9e96ba9db75eb9388f4227751131c7cb0a411d1a8521af4096135de
 WORKDIR /app
 ENV DENO_DIR=/deno-dir \
     DENO_NO_UPDATE_CHECK=1
